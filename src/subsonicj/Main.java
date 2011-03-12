@@ -23,6 +23,8 @@ import java.io.File;
 import java.util.Properties;
 import javax.swing.UIManager;
 
+import objects.MainWindowNew;
+
 import com.jtattoo.plaf.aluminium.AluminiumLookAndFeel;
 
 import servercontact.Media;
@@ -38,7 +40,7 @@ public class Main {
         createAppDirectories();
         loadLookAndFeel();
         Application.loadUIProperties();
-        loadSplashScreen(); // Disable when developing to avoid waiting on splash
+        //loadSplashScreen(); // Disable when developing to avoid waiting on splash
         loadServerForm();
         loadMainWindow();
 
@@ -109,8 +111,8 @@ public class Main {
     private static void loadMainWindow() {
     	if (Server.CONNECTED) {
         	setWindowDecorations(true);
-        	Application.mainWindow = new MainWindow();
-        	Application.mainWindow.setVisible(true);			
+        	Application.mainWindow = new MainWindowNew();
+        	Application.mainWindow.setVisible(true);
 		} else {
 			System.exit(0);
 		}

@@ -3,6 +3,8 @@ package settings;
 import java.awt.Color;
 import java.util.Properties;
 
+import objects.MainWindowNew;
+
 import servercontact.Media;
 import subsonicj.MainWindow;
 import subsonicj.ServerInfoDialog;
@@ -13,7 +15,7 @@ public class Application {
 	Properties properties = new Properties();
 	
 
-    public static MainWindow mainWindow = null;
+    public static MainWindowNew mainWindow = null;
     public static SplashDialog splashDialog = null;
     public static ServerInfoDialog serverInfoDialog = null;
     public static Properties decoratedProperties;

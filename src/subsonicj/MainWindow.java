@@ -1,12 +1,15 @@
 package subsonicj;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout.Group;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -22,15 +25,31 @@ import settings.Application;
 
 public class MainWindow extends JFrame {
 
+	private JLabel albumArtLabel;
+	private JPanel albumArtistPanel;
+	private JLabel albumLabel;
+	private JTextField artistFilterTextField;
+	private JLabel artistLabel;
+	private JList artistList;
+	private JLabel appLogoLabel;
+	private JLabel playAllLabel;
+	private JLabel addAllToPlaylistLabel;
+	private JPanel linksPanel;
+	private JScrollPane artistListScrollPane;
+	private JPanel mainPanel;
+	private JPanel mediaControlPanel;
+	private JLabel statusLabel;
+	private JPanel statusPanel;
+	private JButton playPauseButton;
+
 	public static String[][] ARTIST_IDs = null;
 	public static Object[][] CURRENT_ALBUM_IDs = null;
 	public static Object[][] CURRENT_SONGS_DATA = null;
 	public static String CURRENT_ATRIST = null;
 	static JLabel loadingLabel = new JLabel("Loading...");
 	ShowSongsThread showSongsThread = new ShowSongsThread();
-	ShowAlbumsThread showAlbumsThread = new ShowAlbumsThread(); 
+	ShowAlbumsThread showAlbumsThread = new ShowAlbumsThread();
 	public static LoadIndexes_Thread loadIndexesThread = null;
-
 
 	public MainWindow() {
 		initComponents();
@@ -39,30 +58,30 @@ public class MainWindow extends JFrame {
 	}
 
 	private void loadIndexes() {
-		if (loadIndexesThread == null){
+		if (loadIndexesThread == null) {
 			loadIndexesThread = new LoadIndexes_Thread();
-			
+
 		}
 		if (loadIndexesThread.isRunning()) {
-			int response = 
-				JOptionPane.showConfirmDialog(this, "Already loading. Try again?", 
-						"Confirm", JOptionPane.YES_NO_OPTION);
+			int response = JOptionPane.showConfirmDialog(this,
+					"Already loading. Try again?", "Confirm",
+					JOptionPane.YES_NO_OPTION);
 			if (response == JOptionPane.YES_OPTION) {
 				loadIndexesThread.stop();
 				loadIndexes();
 			} else {
-				
+
 			}
-			
+
 		} else {
 			loadIndexesThread.init();
 		}
-		
-		
+
 	}
 
 	private void initComponents() {
 		mainPanel = new JPanel();
+		mediaControlPanel = new JPanel();
 		appLogoLabel = new JLabel();
 		albumArtistPanel = new JPanel();
 		albumArtLabel = new JLabel();
@@ -76,6 +95,7 @@ public class MainWindow extends JFrame {
 		albumLabel = new JLabel();
 		statusPanel = new JPanel();
 		statusLabel = new JLabel();
+		playPauseButton = new JButton();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize(1000, 600);
@@ -103,9 +123,10 @@ public class MainWindow extends JFrame {
 
 		albumArtistPanel.setLayout(null);
 		albumArtistPanel.setBackground(Application.AppColor_Dark);
-//		MatteBorder albumArtistBorder = BorderFactory.createMatteBorder(1, 1, 1, 1,
-//				defaultAppColor_Border);
-//		albumArtistPanel.setBorder(albumArtistBorder);
+		// MatteBorder albumArtistBorder = BorderFactory.createMatteBorder(1, 1,
+		// 1, 1,
+		// defaultAppColor_Border);
+		// albumArtistPanel.setBorder(albumArtistBorder);
 
 		albumArtLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
 				Application.AppColor_Border));
@@ -116,7 +137,28 @@ public class MainWindow extends JFrame {
 				albumArtLabelMouseClicked(evt);
 			}
 		});
+		
+		mediaControlPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
+				Application.AppColor_SelBgndClr));
+		mediaControlPanel.setBackground(Application.AppColor_Dark);
 
+		playPauseButton.setIcon(new ImageIcon(getClass().getResource(
+				"/res/Play-48.png")));
+		playPauseButton.setBorderPainted(false);
+		playPauseButton.setSize(50, 50);
+
+		GroupLayout mediaControlPanelLayout = new GroupLayout(mediaControlPanel);
+		mediaControlPanel.setLayout(mediaControlPanelLayout);
+		mediaControlPanelLayout.setHorizontalGroup(mediaControlPanelLayout
+				.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(
+						mediaControlPanelLayout.createSequentialGroup()
+								.addContainerGap().addComponent(playPauseButton)
+								.addGap(18, 18, 18)));
+		mediaControlPanelLayout.setVerticalGroup(mediaControlPanelLayout
+				.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				.addComponent(playPauseButton, GroupLayout.DEFAULT_SIZE, 50,
+						Short.MAX_VALUE));
+		
 		linksPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
 				Application.AppColor_SelBgndClr));
 		linksPanel.setBackground(Application.AppColor_Dark);
@@ -126,11 +168,11 @@ public class MainWindow extends JFrame {
 		playAllLabel
 				.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		playAllLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-            	playAllLabelMouseClicked(evt);
-            }
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				playAllLabelMouseClicked(evt);
+			}
 
-        });
+		});
 
 		addAllToPlaylistLabel.setForeground(Application.AppColor_Text);
 		addAllToPlaylistLabel.setText("Add All To Playlist");
@@ -226,7 +268,13 @@ public class MainWindow extends JFrame {
 																		.addGroup(
 																				mainPanelLayout
 																						.createParallelGroup(
-																								GroupLayout.Alignment.LEADING)
+																								GroupLayout.Alignment.LEADING,
+																								true)
+																						.addComponent(
+																								mediaControlPanel,
+																								GroupLayout.DEFAULT_SIZE,
+																								GroupLayout.DEFAULT_SIZE,
+																								Short.MAX_VALUE)
 																						.addComponent(
 																								linksPanel,
 																								GroupLayout.DEFAULT_SIZE,
@@ -243,7 +291,8 @@ public class MainWindow extends JFrame {
 																		.addGroup(
 																				mainPanelLayout
 																						.createParallelGroup(
-																								GroupLayout.Alignment.LEADING)
+																								GroupLayout.Alignment.LEADING,
+																								false)
 																						.addComponent(
 																								albumArtLabel,
 																								GroupLayout.PREFERRED_SIZE,
@@ -280,7 +329,8 @@ public class MainWindow extends JFrame {
 										.addGroup(
 												mainPanelLayout
 														.createParallelGroup(
-																GroupLayout.Alignment.TRAILING)
+																GroupLayout.Alignment.TRAILING,
+																false)
 														.addComponent(
 																linksPanel,
 																GroupLayout.DEFAULT_SIZE,
@@ -380,17 +430,17 @@ public class MainWindow extends JFrame {
 
 	protected void playAllLabelMouseClicked(MouseEvent evt) {
 		// TODO add method information for play all
-		
+
 	}
 
 	private void formComponentShown(java.awt.event.ComponentEvent evt) {
 		// close the loading frame when the main window completely loads
-		//Main..setVisible(false);
+		// Main..setVisible(false);
 	}
 
 	private void appLogoLabelMouseClicked(java.awt.event.MouseEvent evt) {
 		// TODO testing area for dev usage only
-		CurrentSong.pauseSong();
+		CurrentSong.pauseOrUnpauseSong();
 	}
 
 	private void artistFilterTextFieldKeyTyped(java.awt.event.KeyEvent evt) {
@@ -413,23 +463,6 @@ public class MainWindow extends JFrame {
 		});
 	}
 
-	private JLabel albumArtLabel;
-	private JPanel albumArtistPanel;
-	private JLabel albumLabel;
-	private JTextField artistFilterTextField;
-	private JLabel artistLabel;
-	private JList artistList;
-	private JLabel appLogoLabel;
-	private JLabel playAllLabel;
-	private JLabel addAllToPlaylistLabel;
-	private JPanel linksPanel;
-	private JScrollPane artistListScrollPane;
-	private JPanel mainPanel;
-	private JLabel statusLabel;
-	private JPanel statusPanel;
-
-	
-
 	private String getArtistID(String artistName) {
 		for (int i = 0; i < ARTIST_IDs.length; i++) {
 			if (ARTIST_IDs[i][0].equals(artistName)) {
@@ -446,43 +479,44 @@ public class MainWindow extends JFrame {
 		showAlbumsThread.init(id, artistName);
 
 	}
-	
-	private class ShowAlbumsThread implements Runnable{
-		
+
+	private class ShowAlbumsThread implements Runnable {
+
 		String artistID, artistName;
-		
+
 		Thread thread;
-		
-		public boolean isRunning(){
+
+		public boolean isRunning() {
 			if (thread != null) {
 				return thread.isAlive();
 			} else {
 				return false;
 			}
-			
+
 		}
-		
-		public void init(String artID, String artName){
+
+		public void init(String artID, String artName) {
 			thread = new Thread(this);
 			stop();
 			artistID = artID;
 			artistName = artName;
 			thread.start();
 		}
-		
-		public void stop(){
+
+		public void stop() {
 			if (thread != null) {
 				thread.interrupt();
-				System.out.println("MainWindow: Initialized thread interruption");
+				System.out
+						.println("MainWindow: Initialized thread interruption");
 			}
 		}
-		
+
 		@Override
-		public void run(){
+		public void run() {
 			showSelectedAlbumInfo(false);
 			final AlbumTable table = new AlbumTable(artistID);
 			MyScrollPane scrollPane = new MyScrollPane(table);
-			
+
 			CURRENT_ALBUM_IDs = table.ALBUM_INFO;
 			scrollPane.setSize(albumArtistPanel.getWidth(),
 					albumArtistPanel.getHeight());
@@ -494,8 +528,8 @@ public class MainWindow extends JFrame {
 							String albumName = table.getModel()
 									.getValueAt(e.getFirstIndex(), 1)
 									.toString();
-							String artistName = artistList
-									.getSelectedValue().toString();
+							String artistName = artistList.getSelectedValue()
+									.toString();
 							String albumID = CURRENT_ALBUM_IDs[e
 									.getFirstIndex()][2].toString();
 							showSongs(albumID, albumName, artistName);
@@ -507,8 +541,8 @@ public class MainWindow extends JFrame {
 			albumArtistPanel.setLayout(null);
 			albumArtistPanel.add(scrollPane);
 			albumArtistPanel.validate();
-			statusLabel.setText(table.albumCount
-					+ " albums loaded for " + artistName);
+			statusLabel.setText(table.albumCount + " albums loaded for "
+					+ artistName);
 		}
 	}
 
@@ -517,48 +551,49 @@ public class MainWindow extends JFrame {
 			showSongsThread.stop();
 		}
 		showSongsThread.init(albumID, albumName, artistName);
-		
+
 	}
-	
-	private class ShowSongsThread implements Runnable{
-		
+
+	private class ShowSongsThread implements Runnable {
+
 		String albumID, albumName, artistName;
 		Thread thread;
-		
-		public void init(String albID, String albName, String artName){
+
+		public void init(String albID, String albName, String artName) {
 			stop();
 			thread = new Thread(this);
 			albumID = albID;
 			albumName = albName;
 			artistName = artName;
 			thread.start();
-			
+
 		}
-		
-		public boolean isRunning(){
+
+		public boolean isRunning() {
 			if (thread != null) {
 				return thread.isAlive();
 			} else {
 				return false;
 			}
-			
+
 		}
-		
-		public void stop(){
+
+		public void stop() {
 			if (thread != null) {
 				thread.interrupt();
-				System.out.println("MainWindow: Initialized thread interruption");
+				System.out
+						.println("MainWindow: Initialized thread interruption");
 			}
 		}
-		
+
 		@Override
-		public void run(){
+		public void run() {
 			setLoading(true);
 			showSelectedAlbumInfo(true);
 			statusLabel.setText("Loading songs for " + albumName);
 			SongsTable table = new SongsTable(albumID);
 			MyScrollPane scrollPane = new MyScrollPane(table);
-			
+
 			artistLabel.setText(artistName);
 			albumLabel.setText(albumName);
 
@@ -569,8 +604,8 @@ public class MainWindow extends JFrame {
 			albumArtistPanel.add(scrollPane);
 			scrollPane.validate();
 			albumArtistPanel.validate();
-			statusLabel.setText(table.SONG_COUNT
-					+ " songs loaded for " + albumName);
+			statusLabel.setText(table.SONG_COUNT + " songs loaded for "
+					+ albumName);
 			albumArtLabel.setIcon(new ImageIcon(Server.getCoverArt(
 					table.ALBUM_IMAGE_ID,
 					albumArtLabel.getPreferredSize().height)));
@@ -582,12 +617,12 @@ public class MainWindow extends JFrame {
 
 	protected Object[][] getSongsData(JTable table) {
 		DefaultTableModel dtm = (DefaultTableModel) table.getModel();
-	    int nRow = dtm.getRowCount(), nCol = dtm.getColumnCount();
-	    Object[][] tableData = new Object[nRow][nCol];
-	    for (int i = 0 ; i < nRow ; i++)
-	        for (int j = 0 ; j < nCol ; j++)
-	            tableData[i][j] = dtm.getValueAt(i,j);
-	    return tableData;
+		int nRow = dtm.getRowCount(), nCol = dtm.getColumnCount();
+		Object[][] tableData = new Object[nRow][nCol];
+		for (int i = 0; i < nRow; i++)
+			for (int j = 0; j < nCol; j++)
+				tableData[i][j] = dtm.getValueAt(i, j);
+		return tableData;
 	}
 
 	private void showSelectedAlbumInfo(boolean show) {
@@ -597,21 +632,21 @@ public class MainWindow extends JFrame {
 	}
 
 	private void setLoading(boolean loading) {
-//		if (loading) {
-//			int width = loadingFrame.getSize().width;
-//			int height = loadingFrame.getSize().height;
-//			int x = (albumArtistPanel.getWidth() / 2) - (width / 2);
-//			int y = (albumArtistPanel.getHeight() / 2) - (height / 2);
-//			loadingFrame.setLocation(x, y);
-//			loadingFrame.setVisible(true);
-//			
-//			
-//		} else {
-//			try {
-//				albumArtistPanel.remove(loadingLabel);
-//			} catch (Exception e) {
-//			}
-//		}
+		// if (loading) {
+		// int width = loadingFrame.getSize().width;
+		// int height = loadingFrame.getSize().height;
+		// int x = (albumArtistPanel.getWidth() / 2) - (width / 2);
+		// int y = (albumArtistPanel.getHeight() / 2) - (height / 2);
+		// loadingFrame.setLocation(x, y);
+		// loadingFrame.setVisible(true);
+		//
+		//
+		// } else {
+		// try {
+		// albumArtistPanel.remove(loadingLabel);
+		// } catch (Exception e) {
+		// }
+		// }
 
 	}
 
@@ -630,7 +665,7 @@ public class MainWindow extends JFrame {
 			// getValueIsAdjusting() becomes false
 			if (!evt.getValueIsAdjusting()) {
 				JList list = (JList) evt.getSource();
-				//Object selectedIndex = evt.getLastIndex();
+				// Object selectedIndex = evt.getLastIndex();
 				String sel = (String) list.getSelectedValue();
 				String artistID = getArtistID(sel.toString());
 				showAlbums(artistID, sel.toString());
@@ -656,31 +691,31 @@ public class MainWindow extends JFrame {
 		}
 
 	}
-	
-	class LoadIndexes_Thread implements Runnable{
-		
+
+	class LoadIndexes_Thread implements Runnable {
+
 		Thread thread = new Thread();
-		
+
 		public LoadIndexes_Thread() {
 			// TODO Auto-generated method stub
 
 		}
-		
-		public void init(){
+
+		public void init() {
 			thread = new Thread(this);
-	        thread.start();
+			thread.start();
 		}
-		
-		public void stop(){
+
+		public void stop() {
 			if (thread != null) {
 				thread.interrupt();
 			}
 		}
-		
-		public boolean isRunning(){
+
+		public boolean isRunning() {
 			return thread.isAlive();
 		}
-		
+
 		@Override
 		public void run() {
 			statusLabel.setText("Loading artists from server");
@@ -688,10 +723,12 @@ public class MainWindow extends JFrame {
 
 			NodeList artistNodeList = doc.getElementsByTagName("artist");
 			int artistCount = artistNodeList.getLength();
-			statusLabel.setText(artistCount + " artists found at " + Settings.SERVER_ADDRESS);
+			statusLabel.setText(artistCount + " artists found at "
+					+ Settings.SERVER_ADDRESS);
 			ARTIST_IDs = new String[artistCount][2];
 
-			DefaultListModel listModel = (DefaultListModel) artistList.getModel();
+			DefaultListModel listModel = (DefaultListModel) artistList
+					.getModel();
 
 			for (int i = 0; i < artistNodeList.getLength(); i++) {
 				Element artistNode = (Element) artistNodeList.item(i);
@@ -708,9 +745,8 @@ public class MainWindow extends JFrame {
 					+ Settings.SERVER_ADDRESS);
 			artistList.setModel(listModel);
 			albumArtistPanel.validate();
-			
+
 		}
-		
 
 	}
 }

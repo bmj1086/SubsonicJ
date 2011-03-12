@@ -15,6 +15,7 @@ import org.w3c.dom.NodeList;
 import servercontact.Media;
 import servercontact.Server;
 import servercontact.Settings;
+import settings.Application;
 
 @SuppressWarnings("serial")
 public class CurrentSong {
@@ -23,6 +24,7 @@ public class CurrentSong {
 	static Player PLAYER = null;
 	static final Media media = new Media();
 	public static boolean PAUSED = false;
+	public static boolean isQueued = false;
 	
 	public static void setProperties(String songID, String parentID){
 		Document doc = Server.getMusicDirectory(parentID);
@@ -51,16 +53,20 @@ public class CurrentSong {
 	}
 	
 	public static void playSong() {
+		Application.mainWindow.setPlaying();
+		isQueued = true;
 		media.init();
 		
 	}
 	
 	public static void stopSong(){
+		isQueued = false;
 		media.stop();
 		
 	}
 	
-	public static void pauseSong(){
+	public static void pauseOrUnpauseSong(){
+		isQueued = true;
 		media.pause();
 		
 	}
@@ -80,6 +86,11 @@ public class CurrentSong {
 			e.printStackTrace();
 			return null;
 		} 
+	}
+
+	public static boolean isActive() {
+		System.out.println("CurrentSong: isActive = " + PLAYER != null);
+		return PLAYER != null;
 	}
 	
 	
