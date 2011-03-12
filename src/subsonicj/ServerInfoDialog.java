@@ -3,11 +3,13 @@ package subsonicj;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Properties;
 import javax.swing.*;
 import servercontact.Server;
 import servercontact.Settings;
+import settings.Application;
 
 public class ServerInfoDialog extends JDialog {
 
@@ -31,11 +33,12 @@ public class ServerInfoDialog extends JDialog {
 	JLabel usernameLabel = new JLabel();
 	JLabel serverNameExampleLabel = new JLabel();
 	JLabel serverExampleLabel = new JLabel();
+	JLabel passwordExampleLabel = new JLabel();
 	JCheckBox autoSelectCheckBox2 = new JCheckBox();
 	JLabel bgIconLabel = new JLabel();
 	JLabel errorLabel = new JLabel();
 	JLabel orLabel = new JLabel();
-
+	
 	public ServerInfoDialog(java.awt.Frame parent, boolean modal) {
 		super(parent, modal);
 		initComponents();
@@ -45,15 +48,15 @@ public class ServerInfoDialog extends JDialog {
 
 	private void initComponents() {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setTitle("SubsonicJ Server Selection");
+		setTitle("SubsonicJ - Server Selection");
 		setIconImage(new ImageIcon(
 				Main.class.getResource("/res/Application-256.png")).getImage());
 		getContentPane().setLayout(null);
-		setSize(530, 460);
+		setSize(500, 490);
 		setResizable(false);
 		setLocationRelativeTo(null);
 
-		mainPanel.setBackground(new java.awt.Color(34, 34, 34));
+		//mainPanel.setBackground(new java.awt.Color(34, 34, 34));
 		mainPanel.setLayout(null);
 
 		selectServerPanel.setBorder(BorderFactory.createTitledBorder(
@@ -68,18 +71,18 @@ public class ServerInfoDialog extends JDialog {
 		selectServerPanel.setBackground(mainPanel.getBackground());
 
 		serverListComboBox.setFocusable(false);
-		serverListComboBox.setBounds(20, 30, 240, 20);
+		serverListComboBox.setBounds(20, 30, 240, 22);
 		selectServerPanel.add(serverListComboBox);
 
 		connectButton1.setText("Connect");
 		connectButton1.setEnabled(false);
-		connectButton1.setFocusPainted(false);
+		connectButton1.setFocusable(false);
 		connectButton1.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				connectButton1ActionPerformed(evt);
 			}
 		});
-		connectButton1.setBounds(280, 30, 110, 20);
+		connectButton1.setBounds(280, 30, 110, 22);
 		selectServerPanel.add(connectButton1);
 
 		autoSelectCheckBox1.setForeground(new java.awt.Color(102, 102, 102));
@@ -92,7 +95,9 @@ public class ServerInfoDialog extends JDialog {
 						autoSelectCheckBox1ActionPerformed(evt);
 					}
 				});
-		autoSelectCheckBox1.setBounds(30, 170, 360, 20);
+		autoSelectCheckBox1.setBounds(17, 60, 360, 20);
+		//autoSelectCheckBox1.setBackground(Application.AppColor_Dark);
+		autoSelectCheckBox1.setFocusable(false);
 		selectServerPanel.add(autoSelectCheckBox1);
 
 		selectServerPanel.setBounds(40, 30, 410, 100);
@@ -106,7 +111,12 @@ public class ServerInfoDialog extends JDialog {
 				new java.awt.Font("Tahoma", Font.BOLD, 13), new java.awt.Color(
 						102, 102, 102)));
 		createServerPanel.setLayout(null);
-		createServerPanel.setBackground(mainPanel.getBackground());
+		createServerPanel.setOpaque(false);
+		createServerPanel.setBackground(new Color(mainPanel.getBackground().getRed(),
+				mainPanel.getBackground().getGreen(),
+				mainPanel.getBackground().getBlue(),
+				60));
+		
 
 		serverNameLabel.setForeground(new java.awt.Color(102, 102, 102));
 		serverNameLabel.setText("Server Name:");
@@ -115,12 +125,12 @@ public class ServerInfoDialog extends JDialog {
 
 		userNameLabel.setForeground(new java.awt.Color(102, 102, 102));
 		userNameLabel.setText("Username:");
-		userNameLabel.setBounds(20, 90, 200, 20);
+		userNameLabel.setBounds(20, 100, 200, 20);
 		createServerPanel.add(userNameLabel);
 
 		serverNameTextField.setBounds(30, 50, 150, 20);
 		createServerPanel.add(serverNameTextField);
-		usernameTextField.setBounds(30, 110, 150, 20);
+		usernameTextField.setBounds(30, 120, 150, 20);
 		createServerPanel.add(usernameTextField);
 
 		serverAddressLabel.setForeground(new java.awt.Color(102, 102, 102));
@@ -130,18 +140,26 @@ public class ServerInfoDialog extends JDialog {
 
 		passwordLabel.setForeground(new java.awt.Color(102, 102, 102));
 		passwordLabel.setText("Password:");
-		passwordLabel.setBounds(200, 90, 200, 20);
+		passwordLabel.setBounds(200, 100, 200, 20);
 		createServerPanel.add(passwordLabel);
 		serverAddressTextField.setBounds(210, 50, 180, 20);
 		createServerPanel.add(serverAddressTextField);
-		passwordField.setBounds(210, 110, 180, 20);
+		passwordField.setBounds(210, 120, 180, 20);
 		createServerPanel.add(passwordField);
 
-		requiredFieldsLabel.setForeground(new java.awt.Color(230, 0, 0));
-		requiredFieldsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		requiredFieldsLabel.setText("**All Fields Are Required");
-		requiredFieldsLabel.setBounds(210, 140, 180, 20);
-		createServerPanel.add(requiredFieldsLabel);
+		serverExampleLabel.setForeground(new java.awt.Color(90, 90, 90));
+		serverExampleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		serverExampleLabel.setText("e.g. http://127.10.10.10/");
+		serverExampleLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+		serverExampleLabel.setBounds(210, 70, 180, 20);
+		createServerPanel.add(serverExampleLabel);
+		
+		passwordExampleLabel.setForeground(new java.awt.Color(90, 90, 90));
+		passwordExampleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		passwordExampleLabel.setText("Password to the server");
+		passwordExampleLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+		passwordExampleLabel.setBounds(210, 140, 180, 20);
+		createServerPanel.add(passwordExampleLabel);
 
 		testConnectionButton.setText("Test Connection");
 		testConnectionButton.setFocusPainted(false);
@@ -151,7 +169,7 @@ public class ServerInfoDialog extends JDialog {
 						testConnectionButtonActionPerformed(evt);
 					}
 				});
-		testConnectionButton.setBounds(150, 200, 125, 22);
+		testConnectionButton.setBounds(140, 220, 125, 22);
 		createServerPanel.add(testConnectionButton);
 
 		connectButton2.setText("Connect");
@@ -162,45 +180,45 @@ public class ServerInfoDialog extends JDialog {
 				connectButton2ActionPerformed(evt);
 			}
 		});
-		connectButton2.setBounds(280, 200, 110, 20);
+		connectButton2.setBounds(280, 220, 110, 22);
 		createServerPanel.add(connectButton2);
 
 		usernameLabel.setForeground(new java.awt.Color(90, 90, 90));
 		usernameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		usernameLabel.setText("Server username");
 		usernameLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
-		usernameLabel.setBounds(30, 130, 150, -1);
+		usernameLabel.setBounds(30, 140, 150, 20);
 		createServerPanel.add(usernameLabel);
 
 		serverNameExampleLabel.setForeground(new java.awt.Color(90, 90, 90));
 		serverNameExampleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		serverNameExampleLabel.setText("Name this connection");
+		serverNameExampleLabel.setText("e.g. Home Server");
 		serverNameExampleLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
-		serverNameExampleLabel.setBounds(0, 150, 30, 70);
+		serverNameExampleLabel.setBounds(30, 70, 150, 20);
 		createServerPanel.add(serverNameExampleLabel);
 
-		serverExampleLabel.setForeground(new java.awt.Color(90, 90, 90));
-		serverExampleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		serverExampleLabel.setText("e.g. http://127.10.10.10/");
-		serverExampleLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
-		serverExampleLabel.setBounds(210, 70, 180, 20);
-		createServerPanel.add(serverExampleLabel);
+		requiredFieldsLabel.setForeground(new java.awt.Color(230, 0, 0));
+		requiredFieldsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		requiredFieldsLabel.setText("**All Fields Are Required");
+		requiredFieldsLabel.setBounds(210, 190, 180, 20);
+		createServerPanel.add(requiredFieldsLabel);
 
 		autoSelectCheckBox2.setForeground(new java.awt.Color(102, 102, 102));
+		autoSelectCheckBox2.setOpaque(false);
 		autoSelectCheckBox2
 				.setText("Choose this server every time and don't ask me again");
-		autoSelectCheckBox2.setBounds(30, 170, 360, 20);
-		autoSelectCheckBox2.setBackground()
+		autoSelectCheckBox2.setBounds(27, 170, 360, 20);
+		autoSelectCheckBox2.setFocusable(false);
+		
 		createServerPanel.add(autoSelectCheckBox2);
-		createServerPanel.setBounds(40, 150, 410, 240);
+		createServerPanel.setBounds(40, 150, 410, 270);
+		
 		mainPanel.add(createServerPanel);
-		createServerPanel.getAccessibleContext().setAccessibleName(
-				"Or Create a New Server Connection");
-
+		
 		bgIconLabel.setIcon(new ImageIcon(getClass().getResource(
-				"/res/Application-256-trans.png"))); // NOI18N
-		bgIconLabel.setText("bgIconLabel");
-		bgIconLabel.setBounds(280, 190, 256, 256);
+				"/res/Application-256-trans.png"))); 
+		bgIconLabel.setText("");
+		bgIconLabel.setBounds(260, 190, 256, 256);
 		mainPanel.add(bgIconLabel);
 
 		errorLabel.setForeground(new java.awt.Color(230, 0, 0));
@@ -211,15 +229,16 @@ public class ServerInfoDialog extends JDialog {
 						errorLabelPropertyChange(evt);
 					}
 				});
-		errorLabel.setBounds(40, 400, 250, 20);
+		errorLabel.setBounds(40, 420, 250, 20);
 		mainPanel.add(errorLabel);
 
-		orLabel.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+		orLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); 
 		orLabel.setForeground(new java.awt.Color(102, 102, 102));
-		orLabel.setText("OR");
-		orLabel.setBounds(230, 120, -1, 20);
+		orLabel.setText("or");
+		orLabel.setBounds(230, 130, 100, 20);
 		mainPanel.add(orLabel);
-		mainPanel.setBounds(0, 0, 530, 460);
+		
+		mainPanel.setBounds(0, 0, getWidth(), getHeight());
 		getContentPane().add(mainPanel);
 
 	}
@@ -308,29 +327,57 @@ public class ServerInfoDialog extends JDialog {
 		dispose();
 	}// GEN-LAST:event_connectButton2ActionPerformed
 
-	private void connectButton1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_connectButton1ActionPerformed
+	private void connectButton1ActionPerformed(java.awt.event.ActionEvent evt) {
 		String serverName = serverListComboBox.getSelectedItem().toString();
-		System.out.println("ServerInfoDialog: Connecting to saved server - "
-				+ serverName);
-		Server.connectToServer(serverName);
-		Properties serverProperties = Settings
-				.loadServerInfoFromFile(serverName);
+		System.out.println("ServerInfoDialog: Attempting to connect to saved server - " + serverName);
+		
+		Properties serverProperties = Settings.loadServerInfoFromFile(serverName);
+		
+		boolean connectionSuccessful = Server.testConnection(serverProperties.getProperty("serverAddress"),
+				serverProperties.getProperty("username"), 
+				serverProperties.getProperty("password")); 
+		
+		if (connectionSuccessful) {
+			Server.connectToServer(serverName);
+			Settings.deleteServerInfoFile(serverName);
+	
+			Settings.storeServerInfoToFile(autoSelectCheckBox1.isSelected(),
+					serverProperties.getProperty("serverName"),
+					serverProperties.getProperty("serverAddress"), 
+					serverProperties.getProperty("username"), 
+					serverProperties.getProperty("password")); 
+		
+			dispose();
+		} else {
+			errorLabel.setText("Error connecting to server");
+			serverListComboBox.removeItemAt(serverListComboBox.getSelectedIndex());
+			Settings.deleteServerInfoFile(serverName);
+			
+			JOptionPane.showMessageDialog(this, "An error occured while connecting to the server." +
+				System.getProperty("line.separator") +	
+				"Please check the information and try again");
+			String decodedPassword = null;
+			
+			try {
+				decodedPassword = URLDecoder.decode(serverProperties.getProperty("password"), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				System.out.println("ServerInfoDialog: Couldn't URL Decode password. No problem user can re-enter");
+			}
+			
+			serverNameTextField.setText(serverProperties.getProperty("serverName"));
+			serverAddressTextField.setText(serverProperties.getProperty("serverAddress"));
+			usernameTextField.setText(serverProperties.getProperty("username"));
+			passwordField.setText(decodedPassword);
+			
+		}
+		
+		
+	}
 
-		Settings.deleteServerInfoFile(serverName);
-
-		Settings.storeServerInfoToFile(autoSelectCheckBox1.isSelected(),
-				serverProperties.getProperty("serverName"),
-				serverProperties.getProperty("serverAddress"), // address
-				serverProperties.getProperty("username"), // username
-				serverProperties.getProperty("password")); // password
-
-		dispose();
-	}// GEN-LAST:event_connectButton1ActionPerformed
-
-	private void errorLabelPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_errorLabelPropertyChange
+	private void errorLabelPropertyChange(java.beans.PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equals("text")) {
 			if (evt.getNewValue().toString().toLowerCase().contains("success")) {
-				errorLabel.setForeground(Color.GREEN);
+				errorLabel.setForeground(new Color(60, 150, 30));
 			} else {
 				errorLabel.setForeground(Color.RED);
 			}
@@ -338,7 +385,7 @@ public class ServerInfoDialog extends JDialog {
 	}// GEN-LAST:event_errorLabelPropertyChange
 
 	private void autoSelectCheckBox1ActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_autoSelectCheckBox1ActionPerformed
+			java.awt.event.ActionEvent evt) {
 		// TODO add your handling code here:
 	}// GEN-LAST:event_autoSelectCheckBox1ActionPerformed
 

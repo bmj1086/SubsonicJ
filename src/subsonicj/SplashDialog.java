@@ -48,7 +48,8 @@ public class SplashDialog extends javax.swing.JDialog {
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
 
                     public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
+                    	System.out.println("SplashDialog: Closing splash screen");
+                    	System.exit(0);                        
                     }
                 });
                 dialog.setVisible(true);

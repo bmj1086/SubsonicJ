@@ -38,7 +38,7 @@ public class Main {
         createAppDirectories();
         loadLookAndFeel();
         Application.loadUIProperties();
-        loadSplashScreen();
+        loadSplashScreen(); // Disable when developing to avoid waiting on splash
         loadServerForm();
         loadMainWindow();
 
@@ -48,7 +48,7 @@ public class Main {
 	private static void loadLookAndFeel() {
     	try {
     		UIManager.setLookAndFeel("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel");
-            System.out.println("LookAndFeel set");
+            System.out.println("Custom LookAndFeel set");
             
         }
         catch (Exception ex) {
@@ -63,9 +63,9 @@ public class Main {
     public static void setWindowDecorations(boolean on) {
     	//changes the property for decorated window
     	if (on) {
-    		AluminiumLookAndFeel.setCurrentTheme(decoratedProperties);
+    		AluminiumLookAndFeel.setCurrentTheme(Application.decoratedProperties);
 		} else {
-			AluminiumLookAndFeel.setCurrentTheme(undecoratedProperties);
+			AluminiumLookAndFeel.setCurrentTheme(Application.undecoratedProperties);
 		}
 		
 		
@@ -95,17 +95,22 @@ public class Main {
 
     private static void loadServerForm() {
         setWindowDecorations(true);
-       	serverInfoDialog = new ServerInfoDialog(null, true);
-    	serverInfoDialog.setLocationRelativeTo(null);
-        serverInfoDialog.setVisible(!Server.CONNECTED);
+        Application.serverInfoDialog = new ServerInfoDialog(null, true);
+        Application.serverInfoDialog.setLocationRelativeTo(null);
+        if (!Server.CONNECTED) {
+        	System.out.println("Main: server not auto connected or no server information found");
+        	System.out.println("Main: Initializing the server info dialog...");
+        	Application.serverInfoDialog.setVisible(true);
+            
+		}
         
     }
 
     private static void loadMainWindow() {
     	if (Server.CONNECTED) {
         	setWindowDecorations(true);
-    		mainWindow = new MainWindow();
-            mainWindow.setVisible(true);			
+        	Application.mainWindow = new MainWindow();
+        	Application.mainWindow.setVisible(true);			
 		} else {
 			System.exit(0);
 		}
@@ -114,10 +119,11 @@ public class Main {
     }
 
     private static void loadSplashScreen() {
+    	System.out.println("Main: Loading splash screen");
         setWindowDecorations(false);
-    	splashDialog = new SplashDialog(null, true);
-        splashDialog.setLocationRelativeTo(null);
-        splashDialog.setVisible(true);
+        Application.splashDialog = new SplashDialog(null, true);
+        Application.splashDialog.setLocationRelativeTo(null);
+        Application.splashDialog.setVisible(true);
         
     }
 }

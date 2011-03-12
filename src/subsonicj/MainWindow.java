@@ -18,6 +18,7 @@ import org.w3c.dom.*;
 
 import servercontact.Server;
 import servercontact.Settings;
+import settings.Application;
 
 public class MainWindow extends JFrame {
 
@@ -89,7 +90,7 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		mainPanel.setBackground(defaultAppColor_Dark);
+		mainPanel.setBackground(Application.AppColor_Dark);
 
 		appLogoLabel.setIcon(new ImageIcon(getClass().getResource(
 				"/res/application-logo.png")));
@@ -101,13 +102,13 @@ public class MainWindow extends JFrame {
 		});
 
 		albumArtistPanel.setLayout(null);
-		albumArtistPanel.setBackground(defaultAppColor_Dark);
+		albumArtistPanel.setBackground(Application.AppColor_Dark);
 //		MatteBorder albumArtistBorder = BorderFactory.createMatteBorder(1, 1, 1, 1,
 //				defaultAppColor_Border);
 //		albumArtistPanel.setBorder(albumArtistBorder);
 
 		albumArtLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
-				defaultAppColor_Border));
+				Application.AppColor_Border));
 		albumArtLabel.setPreferredSize(new java.awt.Dimension(150, 150));
 		albumArtLabel.addMouseListener(new java.awt.event.MouseAdapter() {
 			@Override
@@ -117,10 +118,10 @@ public class MainWindow extends JFrame {
 		});
 
 		linksPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
-				defaultAppColor_SelBgndClr));
-		linksPanel.setBackground(defaultAppColor_Dark);
+				Application.AppColor_SelBgndClr));
+		linksPanel.setBackground(Application.AppColor_Dark);
 
-		playAllLabel.setForeground(defaultAppColor_Text);
+		playAllLabel.setForeground(Application.AppColor_Text);
 		playAllLabel.setText("Play All");
 		playAllLabel
 				.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -131,7 +132,7 @@ public class MainWindow extends JFrame {
 
         });
 
-		addAllToPlaylistLabel.setForeground(defaultAppColor_Text);
+		addAllToPlaylistLabel.setForeground(Application.AppColor_Text);
 		addAllToPlaylistLabel.setText("Add All To Playlist");
 		addAllToPlaylistLabel.setCursor(new java.awt.Cursor(
 				java.awt.Cursor.HAND_CURSOR));
@@ -154,26 +155,26 @@ public class MainWindow extends JFrame {
 
 		artistListScrollPane.setBorder(null);
 
-		artistList.setBackground(defaultAppColor_Dark);
+		artistList.setBackground(Application.AppColor_Dark);
 		artistList.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1,
-				defaultAppColor_Border));
+				Application.AppColor_Border));
 		artistList.setFont(new java.awt.Font("Tahoma", 0, 14));
-		artistList.setForeground(defaultAppColor_Text);
+		artistList.setForeground(Application.AppColor_Text);
 		artistList.setModel(new DefaultListModel());
 		artistList
 				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		artistList.setFocusable(false);
-		artistList.setSelectionBackground(defaultAppColor_SelBgndClr);
-		artistList.setSelectionForeground(defaultAppColor_Text);
+		artistList.setSelectionBackground(Application.AppColor_SelBgndClr);
+		artistList.setSelectionForeground(Application.AppColor_Text);
 		artistListScrollPane.setViewportView(artistList);
 
 		artistFilterTextField.setFont(new java.awt.Font("Tahoma", 0, 12));
 		artistFilterTextField.setHorizontalAlignment(SwingConstants.CENTER);
 		artistFilterTextField.setText("Filter");
-		artistFilterTextField.setBackground(defaultAppColor_Dark);
-		artistFilterTextField.setForeground(defaultAppColor_Text);
+		artistFilterTextField.setBackground(Application.AppColor_Dark);
+		artistFilterTextField.setForeground(Application.AppColor_Text);
 		artistFilterTextField.setBorder(BorderFactory.createMatteBorder(1, 1,
-				1, 1, defaultAppColor_SelBgndClr));
+				1, 1, Application.AppColor_SelBgndClr));
 		artistFilterTextField.setCursor(new java.awt.Cursor(
 				java.awt.Cursor.TEXT_CURSOR));
 
@@ -185,9 +186,9 @@ public class MainWindow extends JFrame {
 		});
 
 		artistLabel.setFont(new java.awt.Font("Tahoma", 2, 11));
-		artistLabel.setForeground(defaultAppColor_Text);
+		artistLabel.setForeground(Application.AppColor_Text);
 
-		albumLabel.setForeground(defaultAppColor_Text);
+		albumLabel.setForeground(Application.AppColor_Text);
 
 		albumArtLabel.setVisible(false);
 
@@ -335,9 +336,9 @@ public class MainWindow extends JFrame {
 
 		statusPanel.setBackground(new Color(40, 40, 40));
 		statusPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0,
-				defaultAppColor_SelBgndClr));
+				Application.AppColor_SelBgndClr));
 
-		statusLabel.setForeground(defaultAppColor_Border);
+		statusLabel.setForeground(Application.AppColor_Border);
 		statusLabel.setText("\n");
 
 		GroupLayout statusPanelLayout = new GroupLayout(statusPanel);
@@ -412,7 +413,6 @@ public class MainWindow extends JFrame {
 		});
 	}
 
-	// Variables declaration
 	private JLabel albumArtLabel;
 	private JPanel albumArtistPanel;
 	private JLabel albumLabel;
@@ -427,8 +427,6 @@ public class MainWindow extends JFrame {
 	private JPanel mainPanel;
 	private JLabel statusLabel;
 	private JPanel statusPanel;
-
-	// End of variables declaration
 
 	
 

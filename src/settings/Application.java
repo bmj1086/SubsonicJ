@@ -21,10 +21,10 @@ public class Application {
     public static final Media SongPlayer = null;
 	
     // colors to use in the application
-    public static Color defaultAppColor_Dark = new Color(34, 34, 34);
-    public static Color defaultAppColor_Text = new Color(204, 204, 204);
-    public static Color defaultAppColor_Border = new Color(102, 102, 102);
-    public static Color defaultAppColor_SelBgndClr = new Color(50, 50, 50);
+    public static Color AppColor_Dark = new Color(34, 34, 34);
+    public static Color AppColor_Text = new Color(204, 204, 204);
+    public static Color AppColor_Border = new Color(102, 102, 102);
+    public static Color AppColor_SelBgndClr = new Color(50, 50, 50);
 
     
 
@@ -34,7 +34,6 @@ public class Application {
     	undecoratedProperties = new Properties();
     	
     	//decorated window
-    	decoratedProperties.put("rolloverColor", "black");
     	decoratedProperties.put("logoString", "SubsonicJ");
     	decoratedProperties.put("windowDecoration", "on");
     	
