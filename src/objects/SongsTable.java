@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import servercontact.Server;
+import settings.Application;
 import subsonicj.Main;
 
 
@@ -85,8 +86,20 @@ public class SongsTable extends JTable {
                 int row = rowAtPoint(click);
                 if (column == 0) {
                     System.out.println("Playing " + getValueAt(row, 3));
-                    CurrentSong.setProperties(getValueAt(row, 5).toString(), getValueAt(row, 7).toString());
-                    CurrentSong.playSong();
+                    String songID = getValueAt(row, 5).toString();
+                    String parentID = getValueAt(row, 7).toString();
+                    //System.out.println("SongsTable: Setting current song to song id " + songID);
+                    //System.out.println("__and parentID " + parentID);
+                    CurrentPlaylist.clearPlaylist();
+                    CurrentPlaylist.addSongToPlaylist(songID, parentID, true);
+                    
+                } else if (column == 1) {
+                    System.out.println("SongsTable: Adding " + getValueAt(row, 3) + " to playlist");
+                    String songID = getValueAt(row, 5).toString();
+                    String parentID = getValueAt(row, 7).toString();
+                    //System.out.println("SongsTable: Adding song id " + songID);
+                    //System.out.println("__and parentID " + parentID);
+                    CurrentPlaylist.addSongToPlaylist(songID, parentID, false);
                     
                 }
 
@@ -170,6 +183,7 @@ public class SongsTable extends JTable {
             setIcon(addIcon);
             setBorderPainted(false);
             setContentAreaFilled(false);
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
             return this;
         }
     }
@@ -178,12 +192,12 @@ public class SongsTable extends JTable {
         public AddButton(String text, ImageIcon icon) {
             super(text, icon);
             setBorderPainted(false);
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
     }
 
     class PlayPauseRenderer extends DefaultTableCellRenderer {
         public PlayPauseRenderer() {
-            super();
             setHorizontalTextPosition(CENTER);
             setCursor(new Cursor(java.awt.Cursor.HAND_CURSOR));
             setSize(20, 20);
@@ -200,7 +214,6 @@ public class SongsTable extends JTable {
     class AddToPlaylistRenderer extends DefaultTableCellRenderer {
 
         public AddToPlaylistRenderer() {
-            super();
             setHorizontalTextPosition(CENTER);
             setCursor(new Cursor(java.awt.Cursor.HAND_CURSOR));
             setSize(20, 20);

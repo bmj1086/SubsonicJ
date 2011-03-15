@@ -1,12 +1,22 @@
+/* **************************************************************************
+ * **************************************************************************
+ * **************************************************************************
+ * ************* LIST ALL TODOS FOR THE ENTIRE APPLICATION HERE *************
+ * 
+ * **************************************************************************
+ * **************************************************************************
+ * **************************************************************************
+ */
+
+
 package settings;
 
 import java.awt.Color;
 import java.util.Properties;
 
+import objects.CurrentPlaylist;
 import objects.MainWindowNew;
-
 import servercontact.Media;
-import subsonicj.MainWindow;
 import subsonicj.ServerInfoDialog;
 import subsonicj.SplashDialog;
 
@@ -45,4 +55,25 @@ public class Application {
 		
 	}
     
+    public static void setStatus(String string){
+    	mainWindow.setStatus(string);
+    }
+    
+    public static void showNowPlaying(boolean bool){
+    	mainWindow.showNowPlaying(bool);
+    	if (bool){
+    		mainWindow.setNowPlayingLabels();
+    	}
+    }
+    
+    public static void setNowPlayingLabels() {
+    	mainWindow.setNowPlayingLabels();
+    }
+
+	
+    public static void nextSong() {
+		// for now only initialized by the Media class when the current song ends.
+    	
+		
+	}
 }

@@ -1,10 +1,10 @@
 package objects;
 
+import java.applet.AudioClip;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -19,8 +19,11 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -49,55 +52,81 @@ public class MainWindowNew extends JFrame {
 	private JScrollPane artistScrollPane;
 	private JPanel statusPanel;
 	private JPanel linksPanel;
-	private JLabel albumArtLabel;
+	private JLabel selectedAlbumArtLabel;
 	private JPanel albumsSongsPanel;
 	private JPanel mediaControlPanel;
-	private JButton playButton;
+	private PlayButton playButton;
 	private JButton stopButton;
 	private JButton skipBackButton;
 	private JTextField artistFilterTextField;
 	private JButton skipForwardButton;
-	private JLabel playingAlbumLabel;
+	private JLabel selectedAlbumNameLabel;
 	private JLabel statusLabel;
-	private JLabel playingArtistLabel;
+	private JLabel selectedAlbumArtistLabel;
 	private JButton repeatButton;
 	private JButton shuffleButton;
-	private JPanel nowPlayingPanel;
-//private static final String PREFERRED_LOOK_AND_FEEL = "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel";
-	
-	public static String[][] ARTIST_IDs = null;
-	public static Object[][] CURRENT_ALBUM_IDs = null;
-	public static Object[][] CURRENT_SONGS_DATA = null;
-	public static String CURRENT_ATRIST = null;
-	//static JLabel loadingLabel = new JLabel("Loading...");
-	ShowSongsThread showSongsThread = new ShowSongsThread();
-	ShowAlbumsThread showAlbumsThread = new ShowAlbumsThread();
-	public static LoadIndexes_Thread loadIndexesThread = null;
+	private JPanel selectedAlbumInfoPanel;
+	private TrackSeekSlider trackSeekSlider;
 	
 	/* button icons */
 	static ImageIcon pauseButtonIcon = new ImageIcon(MainWindowNew.class.getResource("/res/Pause-48.png"));
 	static ImageIcon playButtonIcon = new ImageIcon(MainWindowNew.class.getResource("/res/Play-48.png"));
 	
+	// ** now playing area ** \\
+	private JSeparator nowPlayingSeparator;
+	private JLabel nowPlayingAlbumLabelLabel;
+	private JLabel nowPlayingTitleLabelLabel;
+	private JLabel nowPlayingArtistLabelLabel;
+	private JLabel nowPlayingAlbumLabel;
+	private JLabel nowPlayingArtistLabel;
+	private JLabel nowPlayingTitleLabel;
+	private JLabel trackLabel;
+	private JLabel nowPlayingAlbumArtLabel;
+	
+	
+	public static String[][] ARTIST_IDs = null;
+	public static Object[][] CURRENT_ALBUM_IDs = null;
+	public static Object[][] CURRENT_SONGS_DATA = null;
+	public static String CURRENT_ATRIST = null;
+	ShowSongsThread showSongsThread = new ShowSongsThread();
+	ShowAlbumsThread showAlbumsThread = new ShowAlbumsThread();
+	public static LoadIndexes_Thread loadIndexesThread = null;
+	private JLabel jLabel1;
+	private JSeparator jSeparator0;
+	private JLabel jLabel0;
+	private JPanel jPanel0;
+	
 	/* for dev usage 
 	 * I use this area to test things by assigning them to the app logo
-	 * mouse click event
-	 * 
-	 * MAKE SURE YOU REMOVE ANYTHING YOU ADD HERE BEFORE PUSHING
+	 * mouse click event MAKE SURE YOU REMOVE ANYTHING YOU ADD HERE BEFORE PUSHING
+	 */
+		protected void appLogoMouseClicked(MouseEvent e) {
+			// going to use a refresh button to refresh the artists
+			
+			
+		}
+	/* end dev usage 
 	 * 
 	 */
-
-	protected void appLogoMouseClicked(MouseEvent e) {
-		loadIndexes();
-		
-	}
-	
-	/* end dev usage */
 	
 	
 	public MainWindowNew() {
 		initComponents();
 		loadIndexes();
+		showNowPlaying(false);
+		showSelectedAlbumInfo(false);
 	}
+
+	public void showNowPlaying(boolean bool) {
+		nowPlayingAlbumArtLabel.setVisible(bool);
+		nowPlayingAlbumLabel.setVisible(bool);
+		nowPlayingAlbumLabelLabel.setVisible(bool);
+		nowPlayingArtistLabel.setVisible(bool);
+		nowPlayingArtistLabelLabel.setVisible(bool);
+		nowPlayingTitleLabel.setVisible(bool);
+		nowPlayingTitleLabelLabel.setVisible(bool);
+	}
+
 
 	private void initComponents() {
 		setTitle("SubsonicJ");
@@ -114,16 +143,166 @@ public class MainWindowNew extends JFrame {
 		
 	}
 	
-	private JPanel getNowPlayingPanel() {
-		if (nowPlayingPanel == null) {
-			nowPlayingPanel = new JPanel();
-			nowPlayingPanel.setBackground(new Color(34, 34, 34));
-			nowPlayingPanel.setLayout(new GroupLayout());
-			nowPlayingPanel.add(getAlbumArtLabel(), new Constraints(new Leading(10, 10, 31), new Leading(10, 138, 10, 10)));
-			nowPlayingPanel.add(getPlayingArtistLabel(), new Constraints(new Leading(10, 11, 41), new Leading(160, 11, 11)));
-			nowPlayingPanel.add(getPlayingAlbumLabel(), new Constraints(new Leading(10, 152, 10, 10), new Leading(187, 11, 11)));
+	private JPanel getJPanel0() {
+		if (jPanel0 == null) {
+			jPanel0 = new JPanel();
+			jPanel0.setBackground(new Color(34, 34, 34));
+			jPanel0.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(102, 102, 102)));
+			jPanel0.setLayout(new GroupLayout());
 		}
-		return nowPlayingPanel;
+		return jPanel0;
+	}
+
+
+	private JLabel getJLabel0() {
+		if (jLabel0 == null) {
+			jLabel0 = new JLabel();
+			jLabel0.setForeground(new Color(204, 204, 204));
+			jLabel0.setText("Play All");
+		}
+		return jLabel0;
+	}
+
+
+	private JSeparator getJSeparator0() {
+		if (jSeparator0 == null) {
+			jSeparator0 = new JSeparator();
+			jSeparator0.setBackground(new Color(34, 34, 34));
+			jSeparator0.setForeground(new Color(102, 102, 102));
+			jSeparator0.setOrientation(SwingConstants.VERTICAL);
+		}
+		return jSeparator0;
+	}
+
+
+	private JLabel getJLabel1() {
+		if (jLabel1 == null) {
+			jLabel1 = new JLabel();
+			jLabel1.setForeground(new Color(204, 204, 204));
+			jLabel1.setText("Add All");
+			jLabel1.setToolTipText("Add all songs below to current playlist");
+		}
+		return jLabel1;
+	}
+
+
+	private JLabel getNowPlayingAlbumArtLabel() {
+		if (nowPlayingAlbumArtLabel == null) {
+			nowPlayingAlbumArtLabel = new JLabel();
+			nowPlayingAlbumArtLabel.setText("");
+		}
+		return nowPlayingAlbumArtLabel;
+	}
+
+
+	private JLabel getTrackLabel() {
+		if (trackLabel == null) {
+			trackLabel = new JLabel();
+			trackLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+			trackLabel.setForeground(new Color(204, 204, 204));
+			trackLabel.setText("Track:");
+		}
+		return trackLabel;
+	}
+
+
+	private JLabel getNowPlayingTitleLabel() {
+		if (nowPlayingTitleLabel == null) {
+			nowPlayingTitleLabel = new JLabel();
+			nowPlayingTitleLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
+			nowPlayingTitleLabel.setForeground(new Color(204, 204, 204));
+			nowPlayingTitleLabel.setText("titleText");
+		}
+		return nowPlayingTitleLabel;
+	}
+
+
+	private JLabel getNowPlayingArtistLabel() {
+		if (nowPlayingArtistLabel == null) {
+			nowPlayingArtistLabel = new JLabel();
+			nowPlayingArtistLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
+			nowPlayingArtistLabel.setForeground(new Color(204, 204, 204));
+			nowPlayingArtistLabel.setText("artistText");
+		}
+		return nowPlayingArtistLabel;
+	}
+
+
+	private JLabel getNowPlayingAlbumLabel() {
+		if (nowPlayingAlbumLabel == null) {
+			nowPlayingAlbumLabel = new JLabel();
+			nowPlayingAlbumLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
+			nowPlayingAlbumLabel.setForeground(new Color(204, 204, 204));
+			nowPlayingAlbumLabel.setText("albumText");
+		}
+		return nowPlayingAlbumLabel;
+	}
+
+
+	private JLabel getNowPlayingArtistLabelLabel() {
+		if (nowPlayingArtistLabelLabel == null) {
+			nowPlayingArtistLabelLabel = new JLabel();
+			nowPlayingArtistLabelLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+			nowPlayingArtistLabelLabel.setForeground(new Color(150, 150, 150));
+			nowPlayingArtistLabelLabel.setText("Artist:");
+		}
+		return nowPlayingArtistLabelLabel;
+	}
+
+
+	private JLabel getNowPlayingTitleLabelLabel() {
+		if (nowPlayingTitleLabelLabel == null) {
+			nowPlayingTitleLabelLabel = new JLabel();
+			nowPlayingTitleLabelLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+			nowPlayingTitleLabelLabel.setForeground(new Color(150, 150, 150));
+			nowPlayingTitleLabelLabel.setText("Title:");
+		}
+		return nowPlayingTitleLabelLabel;
+	}
+
+
+	private JLabel getNowPlayingAlbumLabelLabel() {
+		if (nowPlayingAlbumLabelLabel == null) {
+			nowPlayingAlbumLabelLabel = new JLabel();
+			nowPlayingAlbumLabelLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+			nowPlayingAlbumLabelLabel.setForeground(new Color(150, 150, 150));
+			nowPlayingAlbumLabelLabel.setText("Album:");
+		}
+		return nowPlayingAlbumLabelLabel;
+	}
+
+
+	private JSeparator getNowPlayingSeparator() {
+		if (nowPlayingSeparator == null) {
+			nowPlayingSeparator = new JSeparator();
+			nowPlayingSeparator.setBackground(new Color(34, 34, 34));
+			nowPlayingSeparator.setForeground(new Color(102, 102, 102));
+			nowPlayingSeparator.setOrientation(SwingConstants.VERTICAL);
+			nowPlayingSeparator.setPreferredSize(new Dimension(1, 0));
+			//nowPlayingSeparator.setMaximumSize(new Dimension(1, 32767));
+		}
+		return nowPlayingSeparator;
+	}
+
+
+	private JSlider getTrackPositionSlider() {
+		if (trackSeekSlider == null) {
+			trackSeekSlider = new TrackSeekSlider();
+			
+		}
+		return trackSeekSlider;
+	}
+
+	private JPanel getSelectedAlbumInfoPanel() {
+		if (selectedAlbumInfoPanel == null) {
+			selectedAlbumInfoPanel = new JPanel();
+			selectedAlbumInfoPanel.setBackground(new Color(34, 34, 34));
+			selectedAlbumInfoPanel.setLayout(new GroupLayout());
+			selectedAlbumInfoPanel.add(getSelectedAlbumArtLabel(), new Constraints(new Leading(10, 10, 31), new Leading(10, 138, 10, 10)));
+			selectedAlbumInfoPanel.add(getSelectedAlbumArtistLabel(), new Constraints(new Leading(10, 150, 12, 12), new Leading(154, 12, 12)));
+			selectedAlbumInfoPanel.add(getSelectedAlbumNameLabel(), new Constraints(new Leading(10, 150, 12, 12), new Leading(175, 12, 12)));
+		}
+		return selectedAlbumInfoPanel;
 	}
 
 	private void loadIndexes() {
@@ -155,6 +334,16 @@ public class MainWindowNew extends JFrame {
 			shuffleButton.setIcon(new ImageIcon(getClass().getResource("/res/Shuffle-48.png")));
 			shuffleButton.setBorderPainted(true);
 			shuffleButton.setFocusable(false);
+			shuffleButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					shuffleButtonMouseClicked(e);
+				}
+
+				private void shuffleButtonMouseClicked(MouseEvent e) {
+					CurrentPlaylist.setRandomPlayback(!CurrentPlaylist.isRandomPlay());
+				}
+			});
 		}
 		return shuffleButton;
 	}
@@ -165,29 +354,39 @@ public class MainWindowNew extends JFrame {
 			repeatButton.setIcon(new ImageIcon(getClass().getResource("/res/Repeat-48.png")));
 			repeatButton.setBorderPainted(true);
 			repeatButton.setFocusable(false);
+			// TODO set button to toggle button style.
+			repeatButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					repeatButtonMouseClicked(e);
+				}
+
+				private void repeatButtonMouseClicked(MouseEvent e) {
+					CurrentPlaylist.setRepeatPlayback(!CurrentPlaylist.isRepeatPlay());
+				}
+			});
 		}
 		return repeatButton;
 	}
 
-	private JLabel getPlayingAlbumLabel() {
-		if (playingAlbumLabel == null) {
-			playingAlbumLabel = new JLabel();
-			playingAlbumLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			playingAlbumLabel.setForeground(new Color(204, 204, 204));
-			//jLabel1.setMinimumSize(new Dimension(sdf));
-			playingAlbumLabel.setText("");
+	private JLabel getSelectedAlbumNameLabel() {
+		if (selectedAlbumNameLabel == null) {
+			selectedAlbumNameLabel = new JLabel();
+			selectedAlbumNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			selectedAlbumNameLabel.setForeground(new Color(204, 204, 204));
+			selectedAlbumNameLabel.setText("album");
 		}
-		return playingAlbumLabel;
+		return selectedAlbumNameLabel;
 	}
 
-	private JLabel getPlayingArtistLabel() {
-		if (playingArtistLabel == null) {
-			playingArtistLabel = new JLabel();
-			playingArtistLabel.setFont(new Font("Tahoma", Font.ITALIC, 12));
-			playingArtistLabel.setForeground(new Color(204, 204, 204));
-			playingArtistLabel.setText("jLabel0");
+	private JLabel getSelectedAlbumArtistLabel() {
+		if (selectedAlbumArtistLabel == null) {
+			selectedAlbumArtistLabel = new JLabel();
+			selectedAlbumArtistLabel.setFont(new Font("Tahoma", Font.ITALIC, 12));
+			selectedAlbumArtistLabel.setForeground(new Color(204, 204, 204));
+			selectedAlbumArtistLabel.setText("artist");
 		}
-		return playingArtistLabel;
+		return selectedAlbumArtistLabel;
 	}
 
 	private JButton getSkipForwardButton() {
@@ -196,6 +395,16 @@ public class MainWindowNew extends JFrame {
 			skipForwardButton.setIcon(new ImageIcon(getClass().getResource("/res/Skip-Forward-48.png")));
 			skipForwardButton.setBorderPainted(true);
 			skipForwardButton.setFocusable(false);
+			skipForwardButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					skipForwardButtonMouseClicked(e);
+				}
+
+				private void skipForwardButtonMouseClicked(MouseEvent e) {
+					CurrentPlaylist.skipToNextSong();
+				}
+			});
 		}
 		return skipForwardButton;
 	}
@@ -206,6 +415,17 @@ public class MainWindowNew extends JFrame {
 			skipBackButton.setIcon(new ImageIcon(getClass().getResource("/res/Skip-Back-48.png")));
 			skipBackButton.setBorderPainted(true);
 			skipBackButton.setFocusable(false);
+			skipBackButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					skipBackButtonMouseClicked(e);
+				}
+
+				private void skipBackButtonMouseClicked(MouseEvent e) {
+					CurrentPlaylist.skipToPreviousSong();
+					
+				}
+			});
 		}
 		return skipBackButton;
 	}
@@ -227,10 +447,10 @@ public class MainWindowNew extends JFrame {
 	}
 
 	protected void stopButtonMouseClicked(MouseEvent e) {
-		if (CurrentSong.isQueued){
+		if (CurrentPlaylist.isQueued()){
 			try {
-				CurrentSong.stopSong();
-				switchPausePlayIcon();
+				CurrentPlaylist.stopCurrentSong();
+				playButton.setPaused(false);
 			} catch (Exception ignore){
 				
 			}
@@ -239,10 +459,7 @@ public class MainWindowNew extends JFrame {
 
 	private JButton getPlayButton() {
 		if (playButton == null) {
-			playButton = new JButton();
-			playButton.setIcon(new ImageIcon(getClass().getResource("/res/Play-48.png")));
-			playButton.setBorderPainted(true);
-			playButton.setFocusable(false);
+			playButton = new PlayButton();
 			playButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -254,20 +471,32 @@ public class MainWindowNew extends JFrame {
 	}
 
 	protected void playButtonMouseClicked(MouseEvent e) {
-		if (CurrentSong.isQueued) {
+		if (CurrentPlaylist.isQueued()) {
 			try {
-				CurrentSong.pauseOrUnpauseSong();
-				switchPausePlayIcon();
-			} catch (Exception ignore){
-				
+				System.out.println("MainWindowNew: Toggling pause");
+				CurrentPlaylist.togglePause();
+				setPlayButtonIcon(!CurrentPlaylist.isPaused());
+			} catch (Exception ex){
+				System.out.println("MainWindowNew: Can't pause ");
+				ex.printStackTrace();
 			}
 			
-		} 
+		} else {
+			CurrentPlaylist.playCurrentSong();
+		}
 		
 	}
 
-	protected void switchPausePlayIcon() {
-		if (playButton.getIcon() == playButtonIcon) {
+	public void setNowPlayingLabels() {
+		nowPlayingAlbumLabel.setText(CurrentPlaylist.getCurrentAlbumName());
+		nowPlayingAlbumArtLabel.setIcon(CurrentPlaylist.getCurrentAlbumArt(nowPlayingAlbumArtLabel.getWidth()));
+		nowPlayingArtistLabel.setText(CurrentPlaylist.getCurrentArtistName());
+		nowPlayingTitleLabel.setText(CurrentPlaylist.getCurrentTrackTitle());
+		
+	}
+	
+	protected void setPlayButtonIcon(boolean playing) {
+		if (playing) {
 			playButton.setIcon(pauseButtonIcon);
 		} else {
 			playButton.setIcon(playButtonIcon);
@@ -286,19 +515,26 @@ public class MainWindowNew extends JFrame {
 			mediaControlPanel.add(getSkipForwardButton(), new Constraints(new Leading(150, 43, 10, 10), new Leading(5, 42, 11, 11)));
 			mediaControlPanel.add(getShuffleButton(), new Constraints(new Leading(200, 43, 10, 10), new Leading(5, 42, 11, 11)));
 			mediaControlPanel.add(getRepeatButton(), new Constraints(new Leading(250, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getTrackLabel(), new Constraints(new Leading(3, 12, 12), new Leading(52, 12, 12)));
+			mediaControlPanel.add(getTrackPositionSlider(), new Constraints(new Leading(49, 244, 12, 12), new Leading(53, 14, 12, 12)));
+			mediaControlPanel.add(getNowPlayingAlbumArtLabel(), new Constraints(new Leading(323, 59, 12, 12), new Leading(9, 53, 12, 12)));
+			mediaControlPanel.add(getNowPlayingTitleLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(12, 12, 12)));
+			mediaControlPanel.add(getNowPlayingArtistLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(29, 12, 12)));
+			mediaControlPanel.add(getNowPlayingAlbumLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(46, 12, 12)));
+			mediaControlPanel.add(getNowPlayingTitleLabel(), new Constraints(new Bilateral(440, 12, 40), new Leading(12, 12, 12)));
+			mediaControlPanel.add(getNowPlayingArtistLabel(), new Constraints(new Bilateral(440, 12, 47), new Leading(29, 12, 12)));
+			mediaControlPanel.add(getNowPlayingAlbumLabel(), new Constraints(new Bilateral(440, 12, 50), new Leading(46, 12, 12)));
+			mediaControlPanel.add(getNowPlayingSeparator(), new Constraints(new Leading(307, 2, 10, 10), new Leading(9, 53, 10, 10)));
 		}
 		return mediaControlPanel;
 	}
+
 
 	private JPanel getAlbumsSongsPanel() {
 		if (albumsSongsPanel == null) {
 			albumsSongsPanel = new JPanel();
 			albumsSongsPanel.setBackground(new Color(34, 34, 34));
-			//albumsSongsPanel.setMinimumSize(new Dimension(170, 2147483647));
-			//albumsSongsPanel.setPreferredSize(new Dimension(0, 0));
-			//albumsSongsPanel.setMaximumSize(new Dimension(170, 2147483647));
 			albumsSongsPanel.setLayout(new GroupLayout());
-			
 		}
 		return albumsSongsPanel;
 	}
@@ -310,21 +546,25 @@ public class MainWindowNew extends JFrame {
 			linksPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(102, 102, 102)));
 			linksPanel.setForeground(new Color(204, 204, 204));
 			linksPanel.setLayout(new GroupLayout());
+			linksPanel.add(getJLabel1(), new Constraints(new Leading(85, 12, 12), new Leading(5, 12, 12)));
+			linksPanel.add(getJSeparator0(), new Constraints(new Leading(71, 12, 12), new Leading(5, 16, 12, 12)));
+			linksPanel.add(getJLabel0(), new Constraints(new Leading(12, 47, 12, 12), new Leading(5, 10, 10)));
 		}
 		return linksPanel;
 	}
-	
-	private JLabel getAlbumArtLabel() {
-		if (albumArtLabel == null) {
-			albumArtLabel = new JLabel();
-			albumArtLabel.setBackground(new Color(34, 34, 34));
-			albumArtLabel.setMinimumSize(new Dimension(150, 150));
-			albumArtLabel.setPreferredSize(new Dimension(150, 150));
-			albumArtLabel.setMaximumSize(new Dimension(150, 150));
-			albumArtLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(102, 102, 102)));
-			albumArtLabel.setLayout(new GroupLayout());
+
+
+	private JLabel getSelectedAlbumArtLabel() {
+		if (selectedAlbumArtLabel == null) {
+			selectedAlbumArtLabel = new JLabel();
+			selectedAlbumArtLabel.setBackground(new Color(34, 34, 34));
+			selectedAlbumArtLabel.setMinimumSize(new Dimension(150, 150));
+			selectedAlbumArtLabel.setPreferredSize(new Dimension(150, 150));
+			selectedAlbumArtLabel.setMaximumSize(new Dimension(150, 150));
+			selectedAlbumArtLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(102, 102, 102)));
+			selectedAlbumArtLabel.setLayout(new GroupLayout());
 		}
-		return albumArtLabel;
+		return selectedAlbumArtLabel;
 	}
 
 	private JPanel getStatusPanel() {
@@ -343,7 +583,7 @@ public class MainWindowNew extends JFrame {
 			statusLabel = new JLabel();
 			statusLabel.setBackground(new Color(34, 34, 34));
 			statusLabel.setBorder(null);
-			statusLabel.setText("Status Label");
+			setStatus("Status Label");
 			statusLabel.setForeground(new Color(204, 204, 204));
 			statusLabel.setLayout(new GroupLayout());
 		}
@@ -366,11 +606,15 @@ public class MainWindowNew extends JFrame {
 			artistList.setBackground(new Color(34, 34, 34));
 			artistList.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			artistList.setForeground(new Color(204, 204, 204));
+			artistList.setSelectionForeground(artistList.getBackground());
+			artistList.setSelectionBackground(artistList.getForeground());
+			artistList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			DefaultListModel listModel = new DefaultListModel();
 			artistList.setModel(listModel);
 		}
 		return artistList;
 	}
+
 
 	private JLabel getAppLogoLabel() {
 		if (appLogoLabel == null) {
@@ -408,36 +652,16 @@ public class MainWindowNew extends JFrame {
 			mainPanel.add(getAppLogoLabel(), new Constraints(new Leading(12, 302, 12, 12), new Leading(12, 61, 12, 12)));
 			mainPanel.add(getStatusPanel(), new Constraints(new Bilateral(0, 0, 0), new Trailing(0, 23, 166, 472)));
 			mainPanel.add(getLinksPanel(), new Constraints(new Bilateral(325, 197, 462), new Leading(91, 28, 44, 44)));
-			mainPanel.add(getAlbumsSongsPanel(), new Constraints(new Bilateral(325, 197, 462), new Bilateral(131, 32, 0)));
 			mainPanel.add(getArtistScrollPane(), new Constraints(new Leading(13, 300, 12, 12), new Bilateral(131, 32, 22)));
-			mainPanel.add(getMediaControlPanel(), new Constraints(new Bilateral(325, 199, 241), new Leading(12, 38, 38)));
 			mainPanel.add(getArtistFilterTextField(), new Constraints(new Leading(12, 303, 10, 10), new Leading(91, 27, 10, 10)));
-			mainPanel.add(getNowPlayingPanel(), new Constraints(new Trailing(0, 0, 0), new Bilateral(131, 32, 0)));
+			mainPanel.add(getMediaControlPanel(), new Constraints(new Bilateral(325, 12, 305), new Leading(12, 70, 153, 153)));
+			mainPanel.add(getAlbumsSongsPanel(), new Constraints(new Bilateral(325, 197, 462), new Bilateral(156, 32, 0)));
+			mainPanel.add(getJPanel0(), new Constraints(new Bilateral(325, 197, 0), new Leading(124, 26, 10, 10)));
+			mainPanel.add(getSelectedAlbumInfoPanel(), new Constraints(new Trailing(0, 0, 0), new Trailing(32, 402, 10, 10)));
 		}
 		return mainPanel;
 	}
 
-	/**
-	 * Main entry of the class.
-	 * Note: This class is only created so that you can easily preview the result at runtime.
-	 * It is not expected to be managed by the designer.
-	 * You can modify it as you like.
-	 */
-//	public static void main(String[] args) {
-//		//installLnF();
-//		SwingUtilities.invokeLater(new Runnable() {
-//			@Override
-//			public void run() {
-//				MainWindowNew frame = new MainWindowNew();
-//				frame.setDefaultCloseOperation(MainWindowNew.EXIT_ON_CLOSE);
-//				frame.setTitle("MainWindowNew");
-//				frame.getContentPane().setPreferredSize(frame.getSize());
-//				frame.pack();
-//				frame.setLocationRelativeTo(null);
-//				frame.setVisible(true);
-//			}
-//		});
-//	}
 
 	public static void main(String args[]) {
 		java.awt.EventQueue.invokeLater(new Runnable() {
@@ -491,12 +715,12 @@ public class MainWindowNew extends JFrame {
 		public void run() {
 			setLoading(true);
 			showSelectedAlbumInfo(true);
-			statusLabel.setText("Loading songs for " + albumName);
+			setStatus("Loading songs for " + albumName);
 			SongsTable table = new SongsTable(albumID);
 			MyScrollPane scrollPane = new MyScrollPane(table);
 
-			playingArtistLabel.setText(artistName);
-			playingAlbumLabel.setText(albumName);
+			selectedAlbumArtistLabel.setText(artistName);
+			selectedAlbumNameLabel.setText(albumName);
 
 			scrollPane.setSize(albumsSongsPanel.getWidth(),
 					albumsSongsPanel.getHeight());
@@ -505,11 +729,11 @@ public class MainWindowNew extends JFrame {
 			albumsSongsPanel.add(scrollPane);
 			scrollPane.validate();
 			albumsSongsPanel.validate();
-			statusLabel.setText(table.SONG_COUNT + " songs loaded for "
+			setStatus(table.SONG_COUNT + " songs loaded for "
 					+ albumName);
-			albumArtLabel.setIcon(new ImageIcon(Server.getCoverArt(
+			selectedAlbumArtLabel.setIcon(new ImageIcon(Server.getCoverArt(
 					table.ALBUM_IMAGE_ID,
-					albumArtLabel.getPreferredSize().height)));
+					selectedAlbumArtLabel.getPreferredSize().height)));
 			CURRENT_SONGS_DATA = getSongsData(table);
 			scrollPane.setVisible(true);
 			setLoading(false);
@@ -527,11 +751,10 @@ public class MainWindowNew extends JFrame {
 	}
 	
 	private void showSelectedAlbumInfo(boolean show) {
-		albumArtLabel.setVisible(show);
-		playingArtistLabel.setVisible(show);
-		playingAlbumLabel.setVisible(show);
+		selectedAlbumArtLabel.setVisible(show);
+		selectedAlbumArtistLabel.setVisible(show);
+		selectedAlbumNameLabel.setVisible(show);
 	}
-
 
 	private String getArtistID(String artistName) {
 		for (int i = 0; i < ARTIST_IDs.length; i++) {
@@ -554,10 +777,10 @@ public class MainWindowNew extends JFrame {
 			if (!evt.getValueIsAdjusting()) {
 				try{
 					JList list = (JList) evt.getSource();
-					// Object selectedIndex = evt.getLastIndex();
-					String sel = (String) list.getSelectedValue();
-					String artistID = getArtistID(sel.toString());
-					showAlbums(artistID, sel.toString());
+					int selectedIndex = evt.getLastIndex();
+					String value = (String) list.getSelectedValue();
+					String artistID = getArtistID(value.toString());
+					showAlbums(artistID, value.toString());
 				} catch (Exception ignore) {
 					
 				}
@@ -595,11 +818,11 @@ public class MainWindowNew extends JFrame {
 
 		@Override
 		public void run() {
-			statusLabel.setText("Loading artists from server");
+			setStatus("Loading artists from server");
 			Document doc = Server.getIndexes();
 			NodeList artistNodeList = doc.getElementsByTagName("artist");
 			int artistCount = artistNodeList.getLength();
-			statusLabel.setText(artistCount + " artists found at "
+			setStatus(artistCount + " artists found at "
 					+ Settings.SERVER_ADDRESS);
 			ARTIST_IDs = new String[artistCount][2];
 
@@ -616,11 +839,13 @@ public class MainWindowNew extends JFrame {
 
 			}
 			artistList.addListSelectionListener(new MyListSelectionListener());
-			statusLabel.setText(artistCount + " artists loaded from "
+			setStatus(artistCount + " artists loaded from "
 					+ Settings.SERVER_ADDRESS);
 			artistList.setModel(listModel);
 			artistScrollPane.validate();
 			artistList.validate();
+			
+			// TODO set the border of the selected item to null. Can't figure it out.
 			
 		}
 
@@ -633,7 +858,6 @@ public class MainWindowNew extends JFrame {
 		showAlbumsThread.init(id, artistName);
 
 	}
-	
 	
 	private class ShowAlbumsThread implements Runnable {
 
@@ -694,11 +918,10 @@ public class MainWindowNew extends JFrame {
 			albumsSongsPanel.setLayout(null);
 			albumsSongsPanel.add(scrollPane);
 			albumsSongsPanel.validate();
-			statusLabel.setText(table.albumCount + " albums loaded for "
+			setStatus(table.albumCount + " albums loaded for "
 					+ artistName);
 		}
 	}
-
 
 	private void showSongs(String albumID, String albumName, String artistName) {
 		if (showSongsThread.isRunning()) {
@@ -729,6 +952,12 @@ public class MainWindowNew extends JFrame {
 
 	public void setPlaying() {
 		playButton.setIcon(pauseButtonIcon);
+		
+	}
+
+
+	public void setStatus(String string) {
+		statusLabel.setText(string);
 		
 	}
 	
