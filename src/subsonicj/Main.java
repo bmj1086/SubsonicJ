@@ -18,20 +18,16 @@ System.out.println(ex);
  */
 package subsonicj;
 
-import java.awt.Color;
 import java.io.File;
-import java.util.Properties;
+
 import javax.swing.UIManager;
 
-import objects.MainWindowNew;
-
-import com.jtattoo.plaf.aluminium.AluminiumLookAndFeel;
-
-import servercontact.Media;
+import objects.MainWindow;
 import servercontact.Server;
 import servercontact.Settings;
 import settings.Application;
-import javazoom.jl.player.advanced.*;
+
+import com.jtattoo.plaf.aluminium.AluminiumLookAndFeel;
 
 public class Main {
 
@@ -111,7 +107,7 @@ public class Main {
     private static void loadMainWindow() {
     	if (Server.CONNECTED) {
         	setWindowDecorations(true);
-        	Application.mainWindow = new MainWindowNew();
+        	Application.mainWindow = new MainWindow();
         	Application.mainWindow.setVisible(true);
 		} else {
 			System.exit(0);

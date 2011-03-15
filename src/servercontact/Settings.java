@@ -25,7 +25,8 @@ public class Settings {
 	public static String SERVER_ADDRESS = "";
 	public static String SERVER_USERNAME = "";
 	public static String SERVER_PASSWORD = "";
-	public static String SERVER_NAME = "SubsonicJ";
+	public static String SERVER_NAME = "";
+	public static final String APPLICATION_NAME = "SubsonicJ";
 	public static String VERSION = "";
 
 	// </editor-fold>

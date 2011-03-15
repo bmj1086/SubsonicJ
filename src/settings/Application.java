@@ -14,9 +14,7 @@ package settings;
 import java.awt.Color;
 import java.util.Properties;
 
-import objects.CurrentPlaylist;
-import objects.MainWindowNew;
-import servercontact.Media;
+import objects.MainWindow;
 import subsonicj.ServerInfoDialog;
 import subsonicj.SplashDialog;
 
@@ -25,13 +23,12 @@ public class Application {
 	Properties properties = new Properties();
 	
 
-    public static MainWindowNew mainWindow = null;
+    public static MainWindow mainWindow = null;
     public static SplashDialog splashDialog = null;
     public static ServerInfoDialog serverInfoDialog = null;
     public static Properties decoratedProperties;
     public static Properties undecoratedProperties;
-    public static final Media SongPlayer = null;
-	
+    
     // colors to use in the application
     public static Color AppColor_Dark = new Color(34, 34, 34);
     public static Color AppColor_Text = new Color(204, 204, 204);

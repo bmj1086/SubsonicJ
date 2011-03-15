@@ -33,12 +33,14 @@ public class AlbumTable extends JTable {
         String[] albumCoverIDs = Server.getAlbumCoverIDs(ARTIST_ID);
         String[] albumIDs = Server.getAlbumIDs(ARTIST_ID);
 
+        MainWindow.currentTableData = new String[albumNames.length];
         ALBUM_INFO = new Object[albumNames.length][columnNames.length];
         albumCount = albumImages.length;
 
         for (int i = 0; i < albumNames.length; i++) {
             ALBUM_INFO[i][0] = albumImages[i];
             ALBUM_INFO[i][1] = albumNames[i];
+            MainWindow.currentTableData[i] = albumIDs[i];
             ALBUM_INFO[i][2] = albumIDs[i];
             ALBUM_INFO[i][3] = albumCoverIDs[i];
         }

@@ -1,5 +1,9 @@
 /*************** TODO *****************\
  * need to make the playListList used as random.
+ * change the process of adding a song to the playlist.
+   - Only add the songID to the playlist instead of 
+   - sending a query to gather all of the songs information
+   - this is causing a long delay in adding songs to the playlist
  */
 
 
@@ -15,6 +19,8 @@ import java.util.Random;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.swing.ImageIcon;
 
+import mp3player.MP3Player;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -27,7 +33,9 @@ import settings.Application;
 
 public class CurrentPlaylist {
 
-	static CurrentSong currentSong = new CurrentSong();
+	//static CurrentSong currentSong = new CurrentSong();
+	static MP3Player player = null;
+	
 	
 	//static String[][] playlistData = null;
 	private static List<Properties> playlistProps = new ArrayList<Properties>(0);
@@ -39,11 +47,19 @@ public class CurrentPlaylist {
 	//static boolean queued = 
 
 	public static boolean isQueued(){
-		return currentSong.isPaused() || currentSong.isPlaying();
+		if (player == null) {
+			return false;
+		} else {
+			return player.isPlaying() || player.isPaused();
+		}
 	}
 	
 	public static boolean isPaused(){
-		return currentSong.isPaused();
+		if(player != null){
+			return player.isPaused();
+		} else {
+			return false;
+		}
 	}
 	
 	public static void clearPlaylist(){
@@ -111,45 +127,61 @@ public class CurrentPlaylist {
 		addSongToPlaylist(songProperties, bool);
 	}
 	
-	public static void addSongToPlaylist(Properties properties, boolean bool){
-		if(!playlistProps.contains(properties)){
+	public static void addSongToPlaylist(Properties properties, boolean play){
+		//if(!playlistProps.contains(properties)){
 			playlistProps.add(properties);
-			System.out.println("CurrentPlaylist: Added song to playlist successfully");
-			Application.setStatus("Added song to playlist successfully. Currently " + getPlaylistCount() + " songs in the playlist");
-			System.out.println("CurrentPlaylist: Currently " + getPlaylistCount() + " songs in the playlist");
-			if (bool) {
-				currentSong.setProperties(properties);
-				currentSong.playSong();	
+			if (play) {
+				playCurrentSong();
+				Application.mainWindow.setPlaying(true);
 			}
-		} else {
-			Application.setStatus(properties.getProperty("title") + " already exists in playlist");
-		}
+		//} else {
+		//	Application.setStatus(properties.getProperty("title") + " already exists in playlist");
+		//}
 	}
 
 	public static void skipToNextSong(){
-		boolean play = true;
-		if (currentPosition < getPlaylistCount() - 1) {
-			currentPosition++;
-		} else {
-			if (repeatPlay) {
-				currentPosition = 0;
-				setupPlayList(randomPlay);
+		if(playlistProps.size() > 0){
+			boolean play = true;
+			if (currentPosition < getPlaylistCount() - 1) {
+				currentPosition++;
+				stopCurrentSong();
 			} else {
-				System.out.println("CurrentPlaylist: End of playlist");
-				Application.mainWindow.setStatus("End of playlist");
-				play = false;
+				if (repeatPlay) {
+					currentPosition = 0;
+					setupPlayList(randomPlay);
+					stopCurrentSong();
+				} else {
+					System.out.println("CurrentPlaylist: End of playlist");
+					Application.mainWindow.setStatus("End of playlist");
+					play = false;
+				}
+			}
+			if (play) {
+				playCurrentSong();
 			}
 		}
-		stopCurrentSong();
-		if (play) {
+	}
+	
+	public static void skipToPreviousSong() {
+		if(playlistProps.size() > 0){
+			if (currentPosition == 0) {
+				currentPosition = getPlaylistCount() - 1;
+			} else {
+				currentPosition--;
+			}
+			stopCurrentSong();
 			playCurrentSong();
 		}
 	}
-
+	
 	public static void playCurrentSong() {
+		if (isQueued()) {
+			stopCurrentSong();
+		}
 		if (getPlaylistCount() > currentPosition) {
-			currentSong.setProperties(playlistProps.get(currentPosition));
-			currentSong.playSong();
+			player = new MP3Player(playlistProps.get(currentPosition));
+			player.play();
+			Application.setNowPlayingLabels();
 		} else {
 			System.out.println("CurrentPlaylist: No song in current playlist");
 			Application.mainWindow.setStatus("No song in current playlist");
@@ -162,42 +194,38 @@ public class CurrentPlaylist {
 	}
 	
 	public static void stopCurrentSong() {
-		currentSong.stopSong();
+		if(player != null){
+			player.stop();
+			player = null;
+		}
 	}
 	
-	public static void togglePause() {
-		currentSong.togglePause();
+	public static void pause() {
+		player.pause();
 	}
-
-	public static InputStream getInputStream() {
-		return currentSong.getInputStream();
+	
+	public static void unPause() {
+		player.unPause();
 	}
 	
 	public static ImageIcon getCurrentAlbumArt(int size) {
-		return currentSong.getAlbumArt(size);
+		String albumArtID = player.songProperties.getProperty("coverArt");
+		return new ImageIcon(Server.getCoverArt(albumArtID, size));
 	}
 	
 	public static String getCurrentAlbumName(){
-		return currentSong.getAlbumName();
+		return player.songProperties.getProperty("album");
 	}
 
 	public static String getCurrentArtistName() {
-		return currentSong.getArtistName();
+		return player.songProperties.getProperty("artist");
 	}
 
 	public static String getCurrentTrackTitle() {
-		return currentSong.getTrackTitle();
+		return player.songProperties.getProperty("title");
 	}
 
+
 	
-	public static void skipToPreviousSong() {
-		if (currentPosition == 0) {
-			currentPosition = getPlaylistCount() - 1;
-		} else {
-			currentPosition--;
-		}
-		stopCurrentSong();
-		playCurrentSong();
-	}
 	
 }

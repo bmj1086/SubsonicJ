@@ -22,8 +22,7 @@ import subsonicj.Main;
 public class Server {
 
 	public static boolean CONNECTED = false;
-	static Media MEDIA = new Media();
-
+	
 	public static boolean testConnection(String serverAddressS,
 			String serverUserS, String serverPasswordS) {
 		try {
@@ -59,23 +58,6 @@ public class Server {
 		CONNECTED = true;
 	}
 
-//	public static void playSong(String songID) {
-//		try {
-//			Main.SongPlayer.stop();
-//			String urlS = Settings.SERVER_ADDRESS + "/rest/stream.view?u="
-//					+ Settings.SERVER_USERNAME + "&p="
-//					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
-//					+ songID;
-//			Main.SongPlayer = new Media();
-//			URL url = new URL(urlS);
-//			InputStream is = url.openStream();
-//			MEDIA.init(is);
-//		} catch (Exception e) {
-//			System.out.println("Server: Can't play song");
-//			System.out.println(e);
-//		}
-//	}
-
 	public static void getLicense() {
 	}
 
@@ -89,14 +71,15 @@ public class Server {
 		try {
 			String urlS = Settings.SERVER_ADDRESS + "/rest/getIndexes.view?u="
 					+ Settings.SERVER_USERNAME + "&p="
-					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ";
+					+ Settings.SERVER_PASSWORD + "&v=1.5&c="
+					+ Settings.APPLICATION_NAME;
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
 			Document doc = parse(is);
 			return doc;
 		} catch (Exception ex) {
 			System.out.println("Server: ");
-			System.out.println(ex);
+			ex.printStackTrace();
 			return null;
 		}
 
@@ -141,17 +124,31 @@ public class Server {
 	public static void download() {
 	}
 
-	public static void stream() {
-
+	public static URL getStreamURL(String songID) {
+		URL url = null;
+		try {
+			String urlS = Settings.SERVER_ADDRESS + "/rest/stream.view?u="
+					+ Settings.SERVER_USERNAME + "&p=" + Settings.SERVER_PASSWORD
+					+ "&v=1.5&c=SubsonicJ" + "&id=" + songID;
+			url = new URL(urlS);
+			return url;
+		} catch (Exception e) {
+			System.out.println("CurrentSong: Can't get stream from URL");
+			System.out.println(url);
+			e.printStackTrace();
+			return null;
+		} 
+		
+		
 	}
 
-	public static Image getCoverArt(String albumID, int size) {
+	public static Image getCoverArt(String albumArtID, int size) {
 		Image image = null;
 		try {
 			String urlS = Settings.SERVER_ADDRESS + "/rest/getCoverArt.view?u="
 					+ Settings.SERVER_USERNAME + "&p="
 					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
-					+ albumID + "&size=" + size;
+					+ albumArtID + "&size=" + size;
 			URL url = new URL(urlS);
 			image = ImageIO.read(url);
 		} catch (Exception ex) {
