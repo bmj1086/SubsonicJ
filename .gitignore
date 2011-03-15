@@ -2,4 +2,6 @@ bin
 META-INF
 *.swp
 My_MP3_Player.java
+.settings
+README
 
