@@ -2,7 +2,9 @@ bin
 META-INF
 *.swp
 My_MP3_Player.java
-.settings
-.classpath
-.project
+*settings*
+*classpath*
+*project*
+*gitignore*
+*.log*
 
