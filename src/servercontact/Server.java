@@ -18,6 +18,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.*;
 import subsonicj.Main;
+import settings.Preferences;
 
 public class Server {
 
@@ -50,11 +51,11 @@ public class Server {
 	}
 
 	public static void connectToServer(String string) {
-		Properties serverProperties = Settings.loadServerInfoFromFile(string);
-		Settings.SERVER_NAME = serverProperties.getProperty("serverName");
-		Settings.SERVER_USERNAME = serverProperties.getProperty("username");
-		Settings.SERVER_PASSWORD = serverProperties.getProperty("password");
-		Settings.SERVER_ADDRESS = serverProperties.getProperty("serverAddress");
+		Properties serverProperties = Preferences.loadServerInfoFromFile(string);
+		Preferences.SERVER_NAME = serverProperties.getProperty("serverName");
+		Preferences.SERVER_USERNAME = serverProperties.getProperty("username");
+		Preferences.SERVER_PASSWORD = serverProperties.getProperty("password");
+		Preferences.SERVER_ADDRESS = serverProperties.getProperty("serverAddress");
 
 		CONNECTED = true;
 	}
@@ -62,9 +63,9 @@ public class Server {
 //	public static void playSong(String songID) {
 //		try {
 //			Main.SongPlayer.stop();
-//			String urlS = Settings.SERVER_ADDRESS + "/rest/stream.view?u="
-//					+ Settings.SERVER_USERNAME + "&p="
-//					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
+//			String urlS = Preferences.SERVER_ADDRESS + "/rest/stream.view?u="
+//					+ Preferences.SERVER_USERNAME + "&p="
+//					+ Preferences.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
 //					+ songID;
 //			Main.SongPlayer = new Media();
 //			URL url = new URL(urlS);
@@ -87,9 +88,9 @@ public class Server {
 
 	public static Document getIndexes() {
 		try {
-			String urlS = Settings.SERVER_ADDRESS + "/rest/getIndexes.view?u="
-					+ Settings.SERVER_USERNAME + "&p="
-					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ";
+			String urlS = Preferences.SERVER_ADDRESS + "/rest/getIndexes.view?u="
+					+ Preferences.SERVER_USERNAME + "&p="
+					+ Preferences.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ";
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
 			Document doc = parse(is);
@@ -104,10 +105,10 @@ public class Server {
 
 	public static Document getMusicDirectory(String artistOrAlbumID) {
 		try {
-			String urlS = Settings.SERVER_ADDRESS
+			String urlS = Preferences.SERVER_ADDRESS
 					+ "/rest/getMusicDirectory.view?u="
-					+ Settings.SERVER_USERNAME + "&p="
-					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
+					+ Preferences.SERVER_USERNAME + "&p="
+					+ Preferences.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
 					+ artistOrAlbumID;
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
@@ -148,9 +149,9 @@ public class Server {
 	public static Image getCoverArt(String albumID, int size) {
 		Image image = null;
 		try {
-			String urlS = Settings.SERVER_ADDRESS + "/rest/getCoverArt.view?u="
-					+ Settings.SERVER_USERNAME + "&p="
-					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
+			String urlS = Preferences.SERVER_ADDRESS + "/rest/getCoverArt.view?u="
+					+ Preferences.SERVER_USERNAME + "&p="
+					+ Preferences.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
 					+ albumID + "&size=" + size;
 			URL url = new URL(urlS);
 			image = ImageIO.read(url);
@@ -266,10 +267,10 @@ public class Server {
 			Element index = (Element) indexes.item(i);
 			String coverArtID = index.getAttribute("coverArt");
 			try {
-				String urlS = Settings.SERVER_ADDRESS
+				String urlS = Preferences.SERVER_ADDRESS
 						+ "/rest/getCoverArt.view?u="
-						+ Settings.SERVER_USERNAME + "&p="
-						+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ"
+						+ Preferences.SERVER_USERNAME + "&p="
+						+ Preferences.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ"
 						+ "&id=" + coverArtID + "&size=" + size;
 
 				URL url = new URL(urlS);

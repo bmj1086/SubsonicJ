@@ -1,1 +1,7 @@
 bin
+META-INF
+*.jar
+.settings
+.project
+.settings
+.classpath

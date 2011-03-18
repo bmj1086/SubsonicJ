@@ -8,8 +8,8 @@ import java.net.URLEncoder;
 import java.util.Properties;
 import javax.swing.*;
 import servercontact.Server;
-import servercontact.Settings;
-import settings.Application;
+import settings.Preferences;
+import settings.UI;
 
 public class ServerInfoDialog extends JDialog {
 
@@ -96,7 +96,7 @@ public class ServerInfoDialog extends JDialog {
 					}
 				});
 		autoSelectCheckBox1.setBounds(17, 60, 360, 20);
-		//autoSelectCheckBox1.setBackground(Application.AppColor_Dark);
+		//autoSelectCheckBox1.setBackground(UI.AppColor_Dark);
 		autoSelectCheckBox1.setFocusable(false);
 		selectServerPanel.add(autoSelectCheckBox1);
 
@@ -259,7 +259,7 @@ public class ServerInfoDialog extends JDialog {
 									+ "Would you like to overwrite the previously saved server?",
 							"OOPS!", JOptionPane.YES_NO_OPTION);
 			if (response == JOptionPane.YES_OPTION) {
-				Settings.deleteServerInfoFile(svrName);
+				Preferences.deleteServerInfoFile(svrName);
 			} else {
 				errorLabel.setText("Please select another server name and try again.");
 				serverNameTextField.setText("");
@@ -295,10 +295,10 @@ public class ServerInfoDialog extends JDialog {
 
 			if (connectionSuccess) {
 				System.out.println("ServerInfoDialog: Connection Successful");
-				Settings.SERVER_NAME = serverNameS;
-				Settings.SERVER_USERNAME = serverUserS;
-				Settings.SERVER_PASSWORD = serverPasswordS;
-				Settings.SERVER_ADDRESS = serverAddressS;
+				Preferences.SERVER_NAME = serverNameS;
+				Preferences.SERVER_USERNAME = serverUserS;
+				Preferences.SERVER_PASSWORD = serverPasswordS;
+				Preferences.SERVER_ADDRESS = serverAddressS;
 				connectButton2.setEnabled(true);
 				errorLabel.setText("Connection successful");
 
@@ -320,9 +320,9 @@ public class ServerInfoDialog extends JDialog {
 	private void connectButton2ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_connectButton2ActionPerformed
 		System.out
 				.println("ServerInfoDialog: Saving server information for future use");
-		Settings.storeServerInfoToFile(autoSelectCheckBox2.isSelected(),
-				Settings.SERVER_NAME, Settings.SERVER_ADDRESS,
-				Settings.SERVER_USERNAME, Settings.SERVER_PASSWORD);
+		Preferences.storeServerInfoToFile(autoSelectCheckBox2.isSelected(),
+				Preferences.SERVER_NAME, Preferences.SERVER_ADDRESS,
+				Preferences.SERVER_USERNAME, Preferences.SERVER_PASSWORD);
 		Server.connectToServer("auto");
 		dispose();
 	}// GEN-LAST:event_connectButton2ActionPerformed
@@ -331,7 +331,7 @@ public class ServerInfoDialog extends JDialog {
 		String serverName = serverListComboBox.getSelectedItem().toString();
 		System.out.println("ServerInfoDialog: Attempting to connect to saved server - " + serverName);
 		
-		Properties serverProperties = Settings.loadServerInfoFromFile(serverName);
+		Properties serverProperties = Preferences.loadServerInfoFromFile(serverName);
 		
 		boolean connectionSuccessful = Server.testConnection(serverProperties.getProperty("serverAddress"),
 				serverProperties.getProperty("username"), 
@@ -339,9 +339,9 @@ public class ServerInfoDialog extends JDialog {
 		
 		if (connectionSuccessful) {
 			Server.connectToServer(serverName);
-			Settings.deleteServerInfoFile(serverName);
+			Preferences.deleteServerInfoFile(serverName);
 	
-			Settings.storeServerInfoToFile(autoSelectCheckBox1.isSelected(),
+			Preferences.storeServerInfoToFile(autoSelectCheckBox1.isSelected(),
 					serverProperties.getProperty("serverName"),
 					serverProperties.getProperty("serverAddress"), 
 					serverProperties.getProperty("username"), 
@@ -351,7 +351,7 @@ public class ServerInfoDialog extends JDialog {
 		} else {
 			errorLabel.setText("Error connecting to server");
 			serverListComboBox.removeItemAt(serverListComboBox.getSelectedIndex());
-			Settings.deleteServerInfoFile(serverName);
+			Preferences.deleteServerInfoFile(serverName);
 			
 			JOptionPane.showMessageDialog(this, "An error occured while connecting to the server." +
 				System.getProperty("line.separator") +	
@@ -407,7 +407,7 @@ public class ServerInfoDialog extends JDialog {
 	}
 
 	private void loadSavedServers() {
-		String[] servers = Settings.getSavedServers();
+		String[] servers = Preferences.getSavedServers();
 		if (servers != null) {
 			for (int i = 0; i < servers.length; i++) {
 				String serverName = servers[i].replace(".srv", "");
@@ -431,7 +431,7 @@ public class ServerInfoDialog extends JDialog {
 	}
 
 	private boolean serverNameAvailable(String serverName) {
-		String[] serverNamesTaken = Settings.getSavedServers();
+		String[] serverNamesTaken = Preferences.getSavedServers();
 		if (serverNamesTaken == null || serverNamesTaken.length == 0) {
 			return true;
 		} else {

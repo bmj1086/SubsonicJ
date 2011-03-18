@@ -1,3 +1,7 @@
 #!/bin/bash
 
-java -classpath lib/JTattoo.jar:lib/jl1.0.1.jar:bin subsonicj.Main
+if [ -e subsonicJ.jar ]; then
+    java -jar subsonicJ.jar
+else
+    echo "No jar found. Please compile app first!"
+fi

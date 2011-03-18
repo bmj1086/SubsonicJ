@@ -8,7 +8,7 @@ import subsonicj.MainWindow;
 import subsonicj.ServerInfoDialog;
 import subsonicj.SplashDialog;
 
-public class Application {
+public class UI {
 	
 	Properties properties = new Properties();
 	
@@ -42,5 +42,4 @@ public class Application {
     	undecoratedProperties.setProperty("windowDecoration", "off");
 		
 	}
-    
 }

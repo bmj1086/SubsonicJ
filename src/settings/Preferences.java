@@ -1,24 +1,22 @@
-package servercontact;
+package settings;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import settings.OSDetect;
 
-public class Settings {
-
+public class Preferences {
 	// <editor-fold defaultstate="collapsed" desc="static field declarations">
 	public static final String fileSep = System.getProperty("file.separator");
-	public static final String appDirectory = System.getProperty("user.home")
-			+ fileSep + "SubsonicJ" + fileSep;
-	public static final String serversDirectory = appDirectory + "Servers"
-			+ fileSep;
-	public static final String settingsDirectory = appDirectory + "Settings"
-			+ fileSep;
+
+	public static final String appDirectory = OSDetect.appDirectory("SubsonicJ") + fileSep;
+	public static final String serversDirectory = appDirectory + "Servers" + fileSep;
+	public static final String settingsDirectory = appDirectory + "Settings" + fileSep;
+
 	public static Properties userSettings = null;
-	public static final String userPropertiesFileS = settingsDirectory
-			+ "userSettings";
+	public static final String userPropertiesFileS = settingsDirectory + "userSettings";
 	public static final File userPropertiesFileF = new File(userPropertiesFileS);
 
 	// server information
@@ -30,8 +28,7 @@ public class Settings {
 
 	// </editor-fold>
 
-	public static boolean savePropertiesToFile(Properties props,
-			String absoluteFilePath) {
+	public static boolean savePropertiesToFile(Properties props, String absoluteFilePath) {
 		try {
 			File file = new File(absoluteFilePath);
 			if (file.exists()) {

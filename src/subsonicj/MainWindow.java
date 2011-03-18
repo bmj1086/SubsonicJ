@@ -17,8 +17,8 @@ import objects.*;
 import org.w3c.dom.*;
 
 import servercontact.Server;
-import servercontact.Settings;
-import settings.Application;
+import settings.Preferences;
+import settings.UI;
 
 public class MainWindow extends JFrame {
 
@@ -81,8 +81,7 @@ public class MainWindow extends JFrame {
 		setSize(1000, 600);
 		setLocationRelativeTo(null);
 		setTitle("SubsonicJ");
-		setIconImage(new ImageIcon(
-				Main.class.getResource("/res/Application-256.png")).getImage());
+		setIconImage(new ImageIcon(Main.class.getResource("/res/Application-256.png")).getImage());
 		addComponentListener(new java.awt.event.ComponentAdapter() {
 			@Override
 			public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -90,10 +89,9 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		mainPanel.setBackground(Application.AppColor_Dark);
+		mainPanel.setBackground(UI.AppColor_Dark);
 
-		appLogoLabel.setIcon(new ImageIcon(getClass().getResource(
-				"/res/application-logo.png")));
+		appLogoLabel.setIcon(new ImageIcon(getClass().getResource("/res/application-logo.png")));
 		appLogoLabel.addMouseListener(new java.awt.event.MouseAdapter() {
 			@Override
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -102,13 +100,12 @@ public class MainWindow extends JFrame {
 		});
 
 		albumArtistPanel.setLayout(null);
-		albumArtistPanel.setBackground(Application.AppColor_Dark);
+		albumArtistPanel.setBackground(UI.AppColor_Dark);
 //		MatteBorder albumArtistBorder = BorderFactory.createMatteBorder(1, 1, 1, 1,
 //				defaultAppColor_Border);
 //		albumArtistPanel.setBorder(albumArtistBorder);
 
-		albumArtLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
-				Application.AppColor_Border));
+		albumArtLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UI.AppColor_Border));
 		albumArtLabel.setPreferredSize(new java.awt.Dimension(150, 150));
 		albumArtLabel.addMouseListener(new java.awt.event.MouseAdapter() {
 			@Override
@@ -117,14 +114,12 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		linksPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
-				Application.AppColor_SelBgndClr));
-		linksPanel.setBackground(Application.AppColor_Dark);
+		linksPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UI.AppColor_SelBgndClr));
+		linksPanel.setBackground(UI.AppColor_Dark);
 
-		playAllLabel.setForeground(Application.AppColor_Text);
+		playAllLabel.setForeground(UI.AppColor_Text);
 		playAllLabel.setText("Play All");
-		playAllLabel
-				.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		playAllLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		playAllLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
             	playAllLabelMouseClicked(evt);
@@ -132,10 +127,9 @@ public class MainWindow extends JFrame {
 
         });
 
-		addAllToPlaylistLabel.setForeground(Application.AppColor_Text);
+		addAllToPlaylistLabel.setForeground(UI.AppColor_Text);
 		addAllToPlaylistLabel.setText("Add All To Playlist");
-		addAllToPlaylistLabel.setCursor(new java.awt.Cursor(
-				java.awt.Cursor.HAND_CURSOR));
+		addAllToPlaylistLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
 		GroupLayout linksPanelLayout = new GroupLayout(linksPanel);
 		linksPanel.setLayout(linksPanelLayout);
@@ -155,26 +149,26 @@ public class MainWindow extends JFrame {
 
 		artistListScrollPane.setBorder(null);
 
-		artistList.setBackground(Application.AppColor_Dark);
+		artistList.setBackground(UI.AppColor_Dark);
 		artistList.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1,
-				Application.AppColor_Border));
+				UI.AppColor_Border));
 		artistList.setFont(new java.awt.Font("Tahoma", 0, 14));
-		artistList.setForeground(Application.AppColor_Text);
+		artistList.setForeground(UI.AppColor_Text);
 		artistList.setModel(new DefaultListModel());
 		artistList
 				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		artistList.setFocusable(false);
-		artistList.setSelectionBackground(Application.AppColor_SelBgndClr);
-		artistList.setSelectionForeground(Application.AppColor_Text);
+		artistList.setSelectionBackground(UI.AppColor_SelBgndClr);
+		artistList.setSelectionForeground(UI.AppColor_Text);
 		artistListScrollPane.setViewportView(artistList);
 
 		artistFilterTextField.setFont(new java.awt.Font("Tahoma", 0, 12));
 		artistFilterTextField.setHorizontalAlignment(SwingConstants.CENTER);
 		artistFilterTextField.setText("Filter");
-		artistFilterTextField.setBackground(Application.AppColor_Dark);
-		artistFilterTextField.setForeground(Application.AppColor_Text);
+		artistFilterTextField.setBackground(UI.AppColor_Dark);
+		artistFilterTextField.setForeground(UI.AppColor_Text);
 		artistFilterTextField.setBorder(BorderFactory.createMatteBorder(1, 1,
-				1, 1, Application.AppColor_SelBgndClr));
+				1, 1, UI.AppColor_SelBgndClr));
 		artistFilterTextField.setCursor(new java.awt.Cursor(
 				java.awt.Cursor.TEXT_CURSOR));
 
@@ -186,9 +180,9 @@ public class MainWindow extends JFrame {
 		});
 
 		artistLabel.setFont(new java.awt.Font("Tahoma", 2, 11));
-		artistLabel.setForeground(Application.AppColor_Text);
+		artistLabel.setForeground(UI.AppColor_Text);
 
-		albumLabel.setForeground(Application.AppColor_Text);
+		albumLabel.setForeground(UI.AppColor_Text);
 
 		albumArtLabel.setVisible(false);
 
@@ -336,9 +330,9 @@ public class MainWindow extends JFrame {
 
 		statusPanel.setBackground(new Color(40, 40, 40));
 		statusPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0,
-				Application.AppColor_SelBgndClr));
+				UI.AppColor_SelBgndClr));
 
-		statusLabel.setForeground(Application.AppColor_Border);
+		statusLabel.setForeground(UI.AppColor_Border);
 		statusLabel.setText("\n");
 
 		GroupLayout statusPanelLayout = new GroupLayout(statusPanel);
@@ -688,7 +682,7 @@ public class MainWindow extends JFrame {
 
 			NodeList artistNodeList = doc.getElementsByTagName("artist");
 			int artistCount = artistNodeList.getLength();
-			statusLabel.setText(artistCount + " artists found at " + Settings.SERVER_ADDRESS);
+			statusLabel.setText(artistCount + " artists found at " + Preferences.SERVER_ADDRESS);
 			ARTIST_IDs = new String[artistCount][2];
 
 			DefaultListModel listModel = (DefaultListModel) artistList.getModel();
@@ -705,7 +699,7 @@ public class MainWindow extends JFrame {
 			}
 			artistList.addListSelectionListener(new MyListSelectionListener());
 			statusLabel.setText(artistCount + " artists loaded from "
-					+ Settings.SERVER_ADDRESS);
+					+ Preferences.SERVER_ADDRESS);
 			artistList.setModel(listModel);
 			albumArtistPanel.validate();
 			

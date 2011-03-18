@@ -14,7 +14,7 @@ import org.w3c.dom.NodeList;
 
 import servercontact.Media;
 import servercontact.Server;
-import servercontact.Settings;
+import settings.Preferences;
 
 @SuppressWarnings("serial")
 public class CurrentSong {
@@ -69,8 +69,8 @@ public class CurrentSong {
 		URL url = null;
 		try {
 			String songID = songProperties.getProperty("id");
-			String urlS = Settings.SERVER_ADDRESS + "/rest/stream.view?u="
-					+ Settings.SERVER_USERNAME + "&p=" + Settings.SERVER_PASSWORD
+			String urlS = Preferences.SERVER_ADDRESS + "/rest/stream.view?u="
+					+ Preferences.SERVER_USERNAME + "&p=" + Preferences.SERVER_PASSWORD
 					+ "&v=1.5&c=SubsonicJ" + "&id=" + songID;
 			url = new URL(urlS);
 			return url.openStream();

@@ -7,11 +7,11 @@
 try {
 XMLSerializer serializer = new XMLSerializer();
 serializer.setOutputCharStream(
-new FileWriter(Settings.appDirectory + "albumList.xml"));
+new FileWriter(Preferences.appDirectory + "albumList.xml"));
 serializer.serialize(doc);
 
 } catch (Exception ex) {
-System.out.println(ex);
+Log.print(ex);
 }
  *
  *
@@ -24,21 +24,23 @@ import java.util.Properties;
 import javax.swing.UIManager;
 
 import com.jtattoo.plaf.aluminium.AluminiumLookAndFeel;
+import javazoom.jl.player.advanced.*;
 
 import servercontact.Media;
 import servercontact.Server;
-import servercontact.Settings;
-import settings.Application;
-import javazoom.jl.player.advanced.*;
+import settings.Preferences;
+import settings.UI;
+import debug.Log;
 
 public class Main {
 
+    private static String TAG = "Main";
     
     public static void main(String[] args) {
         createAppDirectories();
         loadLookAndFeel();
-        Application.loadUIProperties();
-        loadSplashScreen(); // Disable when developing to avoid waiting on splash
+        UI.loadUIProperties();
+        //loadSplashScreen(); // Disable when developing to avoid waiting on splash
         loadServerForm();
         loadMainWindow();
 
@@ -48,12 +50,12 @@ public class Main {
 	private static void loadLookAndFeel() {
     	try {
     		UIManager.setLookAndFeel("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel");
-            System.out.println("Custom LookAndFeel set");
+    	    Log.print(TAG, "Custom LookAndFeel set");
             
         }
         catch (Exception ex) {
-    	    System.out.println("Main: Can't load Look and Feel...Exiting application");
-    	    System.out.println(ex);
+    	    Log.print(TAG, "Can't load Look and Feel...Exiting application");
+    	    Log.print(TAG, ex.toString());
             System.exit(0);
             
         }
@@ -63,9 +65,9 @@ public class Main {
     public static void setWindowDecorations(boolean on) {
     	//changes the property for decorated window
     	if (on) {
-    		AluminiumLookAndFeel.setCurrentTheme(Application.decoratedProperties);
+    		AluminiumLookAndFeel.setCurrentTheme(UI.decoratedProperties);
 		} else {
-			AluminiumLookAndFeel.setCurrentTheme(Application.undecoratedProperties);
+			AluminiumLookAndFeel.setCurrentTheme(UI.undecoratedProperties);
 		}
 		
 		
@@ -73,20 +75,20 @@ public class Main {
 
 	private static void createAppDirectories() {
         String[] dirs = new String[]{
-            Settings.appDirectory,
-            Settings.serversDirectory,
-            Settings.settingsDirectory
+            Preferences.appDirectory,
+            Preferences.serversDirectory,
+            Preferences.settingsDirectory
         };
 
         for (int i = 0; i < dirs.length; i++) {
             File directory = new File(dirs[i]);
             if (!directory.exists()) {
                 try {
-                    directory.mkdir();
+                    directory.mkdirs();
                 } catch (Exception e) {
-                    System.out.println("Main: Can't create directories for application");
-                    System.out.println(e);
-                    System.out.println("Main: Shutting Down...");
+    	            Log.print(TAG, "Can't create directories for application");
+                    Log.print(TAG, e.toString());
+                    Log.print(TAG, "Shutting Down...");
                     System.exit(0);
                 }
             }
@@ -95,12 +97,12 @@ public class Main {
 
     private static void loadServerForm() {
         setWindowDecorations(true);
-        Application.serverInfoDialog = new ServerInfoDialog(null, true);
-        Application.serverInfoDialog.setLocationRelativeTo(null);
+        UI.serverInfoDialog = new ServerInfoDialog(null, true);
+        UI.serverInfoDialog.setLocationRelativeTo(null);
         if (!Server.CONNECTED) {
-        	System.out.println("Main: server not auto connected or no server information found");
-        	System.out.println("Main: Initializing the server info dialog...");
-        	Application.serverInfoDialog.setVisible(true);
+        	Log.print(TAG, "Server not auto connected or no server information found");
+        	Log.print(TAG, "Initializing the server info dialog...");
+        	UI.serverInfoDialog.setVisible(true);
             
 		}
         
@@ -109,8 +111,8 @@ public class Main {
     private static void loadMainWindow() {
     	if (Server.CONNECTED) {
         	setWindowDecorations(true);
-        	Application.mainWindow = new MainWindow();
-        	Application.mainWindow.setVisible(true);			
+        	UI.mainWindow = new MainWindow();
+        	UI.mainWindow.setVisible(true);			
 		} else {
 			System.exit(0);
 		}
@@ -119,11 +121,11 @@ public class Main {
     }
 
     private static void loadSplashScreen() {
-    	System.out.println("Main: Loading splash screen");
+    	Log.print(TAG, "Loading splash screen");
         setWindowDecorations(false);
-        Application.splashDialog = new SplashDialog(null, true);
-        Application.splashDialog.setLocationRelativeTo(null);
-        Application.splashDialog.setVisible(true);
+        UI.splashDialog = new SplashDialog(null, true);
+        UI.splashDialog.setLocationRelativeTo(null);
+        UI.splashDialog.setVisible(true);
         
     }
 }
