@@ -6,11 +6,18 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
+import javax.swing.DefaultCellEditor;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -34,28 +41,36 @@ public class SongsTable extends JTable {
 			Main.class.getResource("/res/Play-15.png"));
 	static ImageIcon addIcon = new ImageIcon(
 			Main.class.getResource("/res/Add-to-playlist-15.png"));
+	static ImageIcon playIconHover = new ImageIcon(
+			Main.class.getResource("/res/Play-15-hover.png"));
+	static ImageIcon addIconHover = new ImageIcon(
+			Main.class.getResource("/res/Add-to-playlist-15-hover.png"));
+
 	public String ALBUM_IMAGE_ID = null;
 	public Object[][] SONGS_INFO = null;
 	public int SONG_COUNT = 0;
+	
+	public int mouseOverRow = 0;
+	public int mouseOverCol = 0;
 
 	public SongsTable(String albumID) {
 		super();
 		ALBUM_ID = albumID;
 		ALBUM_IMAGE_ID = Server.getCoverArt(albumID);
 		initComponents();
-
 	}
 
 	private void initComponents() {
+		addMouseMotionListener(getMouseMotionListener());
 		Document doc = Server.getMusicDirectory(ALBUM_ID);
 		NodeList songNodes = doc.getElementsByTagName("child");
 		SONG_COUNT = songNodes.getLength();
 		System.out.println("SongsTable: Found " + SONG_COUNT + " songs");
 		SONGS_INFO = new Object[SONG_COUNT][columnNames.length];
-		
+
 		// sets the current data on the main window
 		MainWindow.currentTableData = new String[songNodes.getLength()];
-		
+
 		for (int i = 0; i < songNodes.getLength(); i++) {
 			Element songNode = (Element) songNodes.item(i);
 			SONGS_INFO[i][2] = songNode.getAttribute("track");
@@ -99,10 +114,6 @@ public class SongsTable extends JTable {
 					// System.out.println("__and parentID " + parentID);
 					CurrentPlaylist.clearPlaylist();
 					CurrentPlaylist.addSongToPlaylist(songID, parentID, true);
-					System.out.println("CurrentPlaylist: Added " + songName
-							+ " to playlist successfully");
-					Application.setStatus("Added " + songName
-							+ " to playlist successfully.");
 
 				} else if (column == 1) {
 					System.out.println("SongsTable: Adding "
@@ -142,7 +153,8 @@ public class SongsTable extends JTable {
 		getColumnModel().getColumn(0).setWidth(25);
 
 		// add to playlist column
-		getColumnModel().getColumn(1).setCellRenderer(new AddButtonRenderer());
+		getColumnModel().getColumn(1).setCellRenderer(new AddToPlaylistRenderer());
+		getColumnModel().getColumn(1).setCellEditor(new AddButtonEditor(new JCheckBox()));
 		getColumnModel().getColumn(1).setMinWidth(25);
 		getColumnModel().getColumn(1).setMaxWidth(25);
 		getColumnModel().getColumn(1).setWidth(25);
@@ -170,6 +182,25 @@ public class SongsTable extends JTable {
 
 	}
 
+	private MouseMotionListener getMouseMotionListener() {
+		MouseMotionListener theReturn = new MouseMotionListener() {
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				mouseOverRow = rowAtPoint(e.getPoint());
+				mouseOverCol = columnAtPoint(e.getPoint());
+			}
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				// unused
+
+			}
+
+		};
+		return theReturn;
+	}
+
 	private String convertDurationToString(String attribute) { // convert
 																// duration to
 																// minutes
@@ -193,21 +224,7 @@ public class SongsTable extends JTable {
 			setIcon(playIcon);
 			setBorderPainted(false);
 			setContentAreaFilled(false);
-			setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-			return this;
-		}
-	}
 
-	class AddButtonRenderer extends JButton implements TableCellRenderer {
-
-		public Component getTableCellRendererComponent(JTable table,
-				Object value, boolean isSelected, boolean hasFocus, int row,
-				int column) {
-			setText("");
-			setIcon(addIcon);
-			setBorderPainted(false);
-			setContentAreaFilled(false);
-			setCursor(new Cursor(Cursor.HAND_CURSOR));
 			return this;
 		}
 	}
@@ -235,22 +252,73 @@ public class SongsTable extends JTable {
 		}
 	}
 
-	class AddToPlaylistRenderer extends DefaultTableCellRenderer {
+	class AddToPlaylistRenderer extends JButton implements TableCellRenderer {
 
 		public AddToPlaylistRenderer() {
-			setHorizontalTextPosition(CENTER);
-			setCursor(new Cursor(java.awt.Cursor.HAND_CURSOR));
-			setSize(20, 20);
-
+			setOpaque(true);
 		}
 
 		@Override
-		public void setValue(Object value) {
-			if (value instanceof Image) {
-				setIcon(new ImageIcon(((Image) value)));
-			}
+		public Component getTableCellRendererComponent(JTable table,
+				Object value, boolean isSelected, boolean hasFocus, int row,
+				int column) {
+//			if (row == mouseOverRow && column == mouseOverCol) {
+//				setIcon(addIconHover);
+//			} else {
+//				setIcon(addIcon);
+//			}
+			
+			setIcon(addIcon);
+			setText((value == null) ? "" : value.toString());
+			setContentAreaFilled(false);
+			setRolloverIcon(addIconHover);
+			setCursor(new Cursor(Cursor.HAND_CURSOR));
+			return this;
 		}
 
 	}
 
+	class AddButtonEditor extends DefaultCellEditor {
+		protected JButton button;
+
+		private String label;
+
+		private boolean isPushed;
+
+		public AddButtonEditor(JCheckBox checkBox) {
+			super(checkBox);
+			button = new JButton();
+			button.setBorderPainted(false);
+			button.setIcon(addIcon);
+			button.setRolloverIcon(addIconHover);
+			button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			button.setOpaque(true);
+			button.setContentAreaFilled(false);
+			button.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					fireEditingStopped();
+				}
+			});
+		}
+
+		public Object getCellEditorValue() {
+			if (isPushed) {
+				//
+				//
+				JOptionPane.showMessageDialog(button, label + ": Ouch!");
+				// System.out.println(label + ": Ouch!");
+			}
+			isPushed = false;
+			return new String(label);
+		}
+
+		public boolean stopCellEditing() {
+			isPushed = false;
+			return super.stopCellEditing();
+		}
+
+		protected void fireEditingStopped() {
+			super.fireEditingStopped();
+		}
+	}
 }

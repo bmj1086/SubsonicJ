@@ -28,9 +28,14 @@ import javax.sound.sampled.BooleanControl;
 import javax.sound.sampled.Control;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 import javax.sound.sampled.SourceDataLine;
 
+import objects.CurrentPlaylist;
+
 import servercontact.Server;
+import settings.AppSettings;
 import settings.Application;
 
 public class MP3Player implements Runnable{
@@ -67,9 +72,8 @@ public class MP3Player implements Runnable{
 	 * in the xml file from the subsonic API. Check Server class. */
 	public Properties songProperties = new Properties();
 	
-	
+		
 	/****** End variable declarations ******/
-	
 	
 	
 	public MP3Player(Properties properties){
@@ -96,21 +100,38 @@ public class MP3Player implements Runnable{
 		}
 	}
 	
+	
+	// the current position of the line in microseconds
+	public long getPosition() {
+		if (line != null) {
+			return line.getMicrosecondPosition();
+		} else {
+			return 0;
+		}
+	}
+	
+	// initializes the current instance and starts the thread
 	public void play(){
 		if(t == null){
 			t = new Thread(this);
 			t.start();
 		}
 	}
-		
+	
+	// changes the stop variable to stop the current song from
+	// playing. Also ends the instance of this class
 	public void stop() {
 		stop = true;
 	}
 
+	// changes the pause variable to true and causes the line reading to 
+	// pause
 	public void pause() {
 		paused = true;
 	}
-	 
+	
+	// changes the pause variable to false and causes the line
+	// to continue reading
 	public void unPause() {
 		synchronized(lock) {
 			paused = false;
@@ -118,18 +139,24 @@ public class MP3Player implements Runnable{
 		}
 	}
 
+	
 	public void mute(){
 		muteControl.setValue(true);
 	}
+	
 	
 	public void unMute(){
 		muteControl.setValue(false);
 	}
 
+	
 	public void setVolume(float gain){ //(range: -80.0db to 6.0206db)
-		volControl.setValue(gain);
+		if (volControl != null) {
+			volControl.setValue(gain);
+		}
 	}
 
+	
 	public boolean isPlaying(){
 		if(line.isRunning() && !isPaused()){
 			return true;
@@ -138,12 +165,15 @@ public class MP3Player implements Runnable{
 		}
 	}
 
+	
 	public boolean isPaused() {
 		return paused;
 	}
-
+	
+	
 	@Override
 	public void run() {
+		boolean playNext = true;
 		try{
 			if(line != null) {
 				line.open(decodedFormat);
@@ -152,6 +182,7 @@ public class MP3Player implements Runnable{
 				line.start();
 				Control control[] = line.getControls();
 				volControl = ((FloatControl)control[0]);
+				volControl.setValue(AppSettings.getVolume());
 				muteControl = ((BooleanControl)control[1]);
 				int nBytesRead;
 				synchronized (lock) {
@@ -168,6 +199,7 @@ public class MP3Player implements Runnable{
 						}
 						if (stop){
 							stop = false;
+							playNext = false;
 							Application.showNowPlaying(false);
 							line.drain();
 							line.stop();
@@ -177,13 +209,21 @@ public class MP3Player implements Runnable{
 						if(!line.isRunning()) {
 							line.start();
 						}
+						
+						// sets the track position on the main screen.
+						int position = convertPositionToSeconds(line.getMicrosecondPosition());
+						Application.mainWindow.setTrackPosition(position);
 						line.write(data, 0, nBytesRead);
+						
 					}
 				}
 				line.drain();
 				line.stop();
 				line.close();
 				din.close();
+				if(playNext) {
+					CurrentPlaylist.skipToNextSong();
+				}
 			} else {
 				
 			}
@@ -196,6 +236,13 @@ public class MP3Player implements Runnable{
 			}
 		}
 		
+	}
+
+
+	private int convertPositionToSeconds(long microsecondPosition) {
+		double theReturnDouble = microsecondPosition / java.lang.Math.pow(10, 6);
+		int theReturn = (int) Math.floor(theReturnDouble);
+		return theReturn;
 	}
 	
 }

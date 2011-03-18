@@ -1,8 +1,11 @@
 package objects;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTable;
@@ -25,6 +28,29 @@ public class AlbumTable extends JTable {
 		super();
 		ARTIST_ID = incomingArtistID;
         initComponents();
+        addMouseMotionListener(getMouseMotionListener());
+	}
+
+	private MouseMotionListener getMouseMotionListener() {
+		MouseMotionListener theReturn = new MouseMotionListener() {
+			
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				if(columnAtPoint(e.getPoint()) == 0 ||
+						columnAtPoint(e.getPoint()) == 1) {
+					setCursor(new Cursor(Cursor.HAND_CURSOR));
+				} else {
+					setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				}
+				
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				// ignore
+			}
+		};
+		return theReturn;
 	}
 
 	private void initComponents() {

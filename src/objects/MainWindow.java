@@ -1,12 +1,18 @@
 package objects;
 
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -22,13 +28,21 @@ import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.dyno.visual.swing.layouts.Bilateral;
 import org.dyno.visual.swing.layouts.Constraints;
@@ -40,7 +54,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import servercontact.Server;
-import servercontact.Settings;
+import settings.AppSettings;
+import settings.Application;
 
 //VS4E -- DO NOT REMOVE THIS LINE!
 public class MainWindow extends JFrame {
@@ -89,18 +104,19 @@ public class MainWindow extends JFrame {
 	public static Object[][] CURRENT_ALBUM_IDs = null;
 	public static Object[][] CURRENT_SONGS_DATA = null;
 	public static String CURRENT_ATRIST = null;
+
 	ShowSongsThread showSongsThread = new ShowSongsThread();
 	ShowAlbumsThread showAlbumsThread = new ShowAlbumsThread();
+	GetArtistList getArtistIndex = null;
 
-	public static LoadIndexes_Thread loadIndexesThread = null;
 	private JLabel jLabel1;
 	private JSeparator jSeparator0;
 	private PlayAllButton playAllButton;
 	private JPanel jPanel0;
 	private JLabel statusLabel;
-	private JLabel jLabel3;
-	private JSlider jSlider0;
-	private JSlider jSlider1;
+	private JLabel volumeLabel;
+	private JSlider trackSlider;
+	private JSlider volumeSlider;
 
 	/*
 	 * for dev usage I use this area to test things by assigning them to the app
@@ -118,9 +134,15 @@ public class MainWindow extends JFrame {
 
 	public MainWindow() {
 		initComponents();
-		loadIndexes();
 		showNowPlaying(false);
 		showSelectedAlbumInfo(false);
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				loadIndexes();
+			}
+		});
 
 	}
 
@@ -151,27 +173,39 @@ public class MainWindow extends JFrame {
 
 	}
 
-	private JSlider getJSlider1() {
-		if (jSlider1 == null) {
-			jSlider1 = new JSlider();
+	private JSlider getVolumeSlider() {
+		if (volumeSlider == null) {
+			volumeSlider = new JSlider();
+			volumeSlider.setFocusable(false);
+			volumeSlider.setMinimum(-80);
+			volumeSlider.setMaximum(6);
+			volumeSlider.setValue(0);
+			volumeSlider.addChangeListener(new ChangeListener() {
+
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					CurrentPlaylist.setVolume(volumeSlider.getValue());
+
+				}
+			});
 		}
-		return jSlider1;
+		return volumeSlider;
 	}
 
-	private JSlider getJSlider0() {
-		if (jSlider0 == null) {
-			jSlider0 = new JSlider();
+	private JSlider getTrackSlider() {
+		if (trackSlider == null) {
+			trackSlider = new JSlider();
 		}
-		return jSlider0;
+		return trackSlider;
 	}
 
-	private JLabel getJLabel3() {
-		if (jLabel3 == null) {
-			jLabel3 = new JLabel();
-			jLabel3.setForeground(new Color(204, 204, 204));
-			jLabel3.setText("Volume:");
+	private JLabel getVolumeLabel() {
+		if (volumeLabel == null) {
+			volumeLabel = new JLabel();
+			volumeLabel.setForeground(new Color(204, 204, 204));
+			volumeLabel.setText("Volume:");
 		}
-		return jLabel3;
+		return volumeLabel;
 	}
 
 	private JLabel getStatusLabel() {
@@ -339,15 +373,19 @@ public class MainWindow extends JFrame {
 	}
 
 	private void loadIndexes() {
-		if (loadIndexesThread == null) {
-			loadIndexesThread = new LoadIndexes_Thread();
+		Application.showMessage("Loading artists", artistList,
+				FloatingMessage.CENTER_PARENT, 0, false);
+		setStatus("Loading artists from server");
+
+		if (getArtistIndex == null) {
+			getArtistIndex = new GetArtistList();
 		}
-		if (loadIndexesThread.isRunning()) {
+		if (getArtistIndex.isRunning()) {
 			int response = JOptionPane.showConfirmDialog(this,
 					"Already loading. Try again?", "Confirm",
 					JOptionPane.YES_NO_OPTION);
 			if (response == JOptionPane.YES_OPTION) {
-				loadIndexesThread.stop();
+				getArtistIndex.stop();
 				loadIndexes();
 			} else {
 
@@ -355,8 +393,28 @@ public class MainWindow extends JFrame {
 
 		} else {
 			artistList.removeAll();
-			loadIndexesThread.init();
+			getArtistIndex.init();
+
 		}
+
+		final Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+
+			@Override
+			public void run() {
+				if (!getArtistIndex.isRunning()) {
+					timer.cancel();
+					artistList.setModel(getArtistIndex.artistList.getModel());
+					// artistList.repaint();
+					artistList
+							.addListSelectionListener(new MyListSelectionListener());
+					Application.closeMessage("Loading artists");
+					setStatus(artistList.getModel().getSize()
+							+ " artists found at " + AppSettings.SERVER_ADDRESS);
+				}
+
+			}
+		}, 100, 100);
 
 	}
 
@@ -366,16 +424,14 @@ public class MainWindow extends JFrame {
 			shuffleButton.setIcon(new ImageIcon(getClass().getResource(
 					"/res/Shuffle-48.png")));
 			shuffleButton.setBorderPainted(true);
+			shuffleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 			shuffleButton.setFocusable(false);
 			shuffleButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					shuffleButtonMouseClicked(e);
-				}
-
-				private void shuffleButtonMouseClicked(MouseEvent e) {
-					CurrentPlaylist.setRandomPlayback(!CurrentPlaylist
-							.isRandomPlay());
+					CurrentPlaylist.shuffle();
+					Application.showMessage("Playlist shuffled", shuffleButton,
+							FloatingMessage.BOTTOM_RIGHT, 3000, true);
 				}
 			});
 		}
@@ -389,16 +445,18 @@ public class MainWindow extends JFrame {
 					"/res/Repeat-48.png")));
 			repeatButton.setBorderPainted(true);
 			repeatButton.setFocusable(false);
+			repeatButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 			// TODO set button to toggle button style.
 			repeatButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					repeatButtonMouseClicked(e);
-				}
-
-				private void repeatButtonMouseClicked(MouseEvent e) {
 					CurrentPlaylist.setRepeatPlayback(!CurrentPlaylist
 							.isRepeatPlay());
+					String message = "Repeat ";
+					message = (CurrentPlaylist.isRepeatPlay()) ? "Repeat on"
+							: "Repeat off";
+					Application.showMessage(message, repeatButton,
+							FloatingMessage.BOTTOM_RIGHT, 3000, true);
 				}
 			});
 		}
@@ -454,6 +512,7 @@ public class MainWindow extends JFrame {
 					"/res/Skip-Back-48.png")));
 			skipBackButton.setBorderPainted(true);
 			skipBackButton.setFocusable(false);
+			skipBackButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 			skipBackButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -488,12 +547,8 @@ public class MainWindow extends JFrame {
 
 	protected void stopButtonMouseClicked(MouseEvent e) {
 		if (CurrentPlaylist.isQueued()) {
-			try {
-				CurrentPlaylist.stopCurrentSong();
-				playButton.setPlaying(false);
-			} catch (Exception ignore) {
-
-			}
+			CurrentPlaylist.clearPlaylist();
+			CurrentPlaylist.stopCurrentSong();
 		}
 	}
 
@@ -563,10 +618,12 @@ public class MainWindow extends JFrame {
 					new Leading(307, 2, 10, 10), new Leading(9, 53, 10, 10)));
 			mediaControlPanel.add(getTrackPositionSlider(), new Constraints(
 					new Leading(49, 94, 74, 74), new Leading(53, 14, 12, 12)));
-			mediaControlPanel.add(getJLabel3(), new Constraints(new Leading(
-					150, 68, 68), new Leading(51, 12, 12)));
-			mediaControlPanel.add(getJSlider0(), new Constraints(new Leading(
-					112, 74, 74), new Trailing(12, 79, 79)));
+			mediaControlPanel.add(getTrackSlider(), new Constraints(
+					new Leading(112, 74, 74), new Trailing(12, 79, 79)));
+			mediaControlPanel.add(getVolumeLabel(), new Constraints(
+					new Leading(150, 68, 68), new Leading(51, 12, 12)));
+			mediaControlPanel.add(getVolumeSlider(), new Constraints(
+					new Leading(202, 91, 74, 74), new Leading(52, 14, 24, 24)));
 		}
 		return mediaControlPanel;
 	}
@@ -702,8 +759,6 @@ public class MainWindow extends JFrame {
 					0), new Leading(124, 26, 10, 10)));
 			mainPanel.add(getSelectedAlbumInfoPanel(), new Constraints(
 					new Trailing(0, 0, 0), new Trailing(32, 402, 10, 10)));
-			// mainPanel.add(getJSlider1(), new Constraints(new Leading(143, 10,
-			// 10), new Leading(57, 10, 10)));
 		}
 		return mainPanel;
 	}
@@ -754,7 +809,9 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void run() {
-			setLoading(true);
+			String loadingMessage = "Loading songs";
+			Application.showMessage(loadingMessage, albumsSongsPanel,
+					FloatingMessage.CENTER_PARENT, 0, false);
 			showSelectedAlbumInfo(true);
 			setStatus("Loading songs for " + albumName);
 			SongsTable table = new SongsTable(albumID);
@@ -768,15 +825,15 @@ public class MainWindow extends JFrame {
 			albumsSongsPanel.removeAll();
 			albumsSongsPanel.setLayout(null);
 			albumsSongsPanel.add(scrollPane);
-			scrollPane.validate();
-			albumsSongsPanel.validate();
+			// scrollPane.validate();
+			// albumsSongsPanel.validate();
 			setStatus(table.SONG_COUNT + " songs loaded for " + albumName);
 			selectedAlbumArtLabel.setIcon(new ImageIcon(Server.getCoverArt(
 					table.ALBUM_IMAGE_ID,
 					selectedAlbumArtLabel.getPreferredSize().height)));
 			CURRENT_SONGS_DATA = getSongsData(table);
 			scrollPane.setVisible(true);
-			setLoading(false);
+			Application.closeMessage(loadingMessage);
 		}
 	}
 
@@ -832,67 +889,6 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	class LoadIndexes_Thread implements Runnable {
-
-		Thread thread = new Thread();
-
-		public LoadIndexes_Thread() {
-			// TODO Auto-generated method stub
-
-		}
-
-		public void init() {
-			thread = new Thread(this);
-			thread.start();
-		}
-
-		public void stop() {
-			if (thread != null) {
-				thread.interrupt();
-			}
-		}
-
-		public boolean isRunning() {
-			return thread.isAlive();
-		}
-
-		@Override
-		public void run() {
-			setStatus("Loading artists from server");
-			Document doc = Server.getIndexes();
-			NodeList artistNodeList = doc.getElementsByTagName("artist");
-			int artistCount = artistNodeList.getLength();
-			setStatus(artistCount + " artists found at "
-					+ Settings.SERVER_ADDRESS);
-			ARTIST_IDs = new String[artistCount][2];
-
-			DefaultListModel listModel = (DefaultListModel) artistList
-					.getModel();
-
-			for (int i = 0; i < artistNodeList.getLength(); i++) {
-				Element artistNode = (Element) artistNodeList.item(i);
-				int pos = listModel.getSize();
-
-				listModel.add(pos, artistNode.getAttribute("name"));
-
-				ARTIST_IDs[i][0] = artistNode.getAttribute("name");
-				ARTIST_IDs[i][1] = artistNode.getAttribute("id");
-
-			}
-			artistList.addListSelectionListener(new MyListSelectionListener());
-			setStatus(artistCount + " artists loaded from "
-					+ Settings.SERVER_ADDRESS);
-			artistList.setModel(listModel);
-			artistScrollPane.validate();
-			artistList.validate();
-
-			// TODO set the border of the selected item to null. Can't figure it
-			// out.
-
-		}
-
-	}
-
 	private void showAlbums(String id, final String artistName) {
 		if (showAlbumsThread.isRunning()) {
 			showAlbumsThread.stop();
@@ -932,10 +928,12 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void run() {
+			String loadingMessage = "Loading albums";
+			Application.showMessage(loadingMessage, albumsSongsPanel,
+					FloatingMessage.CENTER_PARENT, 0, false);
 			showSelectedAlbumInfo(false);
 			final AlbumTable table = new AlbumTable(artistID);
 			MyScrollPane scrollPane = new MyScrollPane(table);
-
 			CURRENT_ALBUM_IDs = table.ALBUM_INFO;
 			scrollPane.setSize(albumsSongsPanel.getWidth(),
 					albumsSongsPanel.getHeight());
@@ -959,8 +957,9 @@ public class MainWindow extends JFrame {
 			albumsSongsPanel.removeAll();
 			albumsSongsPanel.setLayout(null);
 			albumsSongsPanel.add(scrollPane);
-			albumsSongsPanel.validate();
+			// albumsSongsPanel.validate();
 			setStatus(table.albumCount + " albums loaded for " + artistName);
+			Application.closeMessage(loadingMessage);
 		}
 	}
 
@@ -969,30 +968,6 @@ public class MainWindow extends JFrame {
 			showSongsThread.stop();
 		}
 		showSongsThread.init(albumID, albumName, artistName);
-
-	}
-
-	private void setLoading(boolean loading) {
-		// if (loading) {
-		// int width = loadingFrame.getSize().width;
-		// int height = loadingFrame.getSize().height;
-		// int x = (nowPlayingPanel.getWidth() / 2) - (width / 2);
-		// int y = (nowPlayingPanel.getHeight() / 2) - (height / 2);
-		// loadingFrame.setLocation(x, y);
-		// loadingFrame.setVisible(true);
-		//
-		//
-		// } else {
-		// try {
-		// nowPlayingPanel.remove(loadingLabel);
-		// } catch (Exception e) {
-		// }
-		// }
-
-	}
-
-	public void setPaused(boolean paused) {
-		playButton.setPlaying(!paused);
 
 	}
 
@@ -1009,4 +984,32 @@ public class MainWindow extends JFrame {
 		return currentTableData;
 
 	}
+
+//	public void startTrackTimer(int maximum) {
+//		trackSeekSlider.setMaximum(maximum);
+//		System.out.println("Maximum: " + maximum);
+//		trackSeekSlider.setMinimum(0);
+//		final Timer timer = new Timer();
+//		timer.scheduleAtFixedRate(new TimerTask() {
+//
+//			@Override
+//			public void run() {
+//				if (CurrentPlaylist.isQueued()) {
+//					trackSeekSlider.setValue(CurrentPlaylist.getTrackPosition());
+//				} else {
+//					timer.cancel();
+//				}
+//			}
+//		}, 500, 500);
+//
+//	}
+	
+	public void setTrackDuration(int duration) {
+		trackSeekSlider.setMaximum(duration);
+	}
+	
+	public void setTrackPosition(int position) {
+		trackSeekSlider.setValue(position);
+	}
+
 }

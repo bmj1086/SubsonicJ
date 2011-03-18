@@ -9,15 +9,20 @@ package servercontact;
 
 //import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import java.awt.Image;
-import java.io.FileWriter;
 import java.io.InputStream;
-import java.net.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Properties;
+
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.*;
-import subsonicj.Main;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import settings.AppSettings;
 
 public class Server {
 
@@ -49,11 +54,11 @@ public class Server {
 	}
 
 	public static void connectToServer(String string) {
-		Properties serverProperties = Settings.loadServerInfoFromFile(string);
-		Settings.SERVER_NAME = serverProperties.getProperty("serverName");
-		Settings.SERVER_USERNAME = serverProperties.getProperty("username");
-		Settings.SERVER_PASSWORD = serverProperties.getProperty("password");
-		Settings.SERVER_ADDRESS = serverProperties.getProperty("serverAddress");
+		Properties serverProperties = AppSettings.loadServerInfoFromFile(string);
+		AppSettings.SERVER_NAME = serverProperties.getProperty("serverName");
+		AppSettings.SERVER_USERNAME = serverProperties.getProperty("username");
+		AppSettings.SERVER_PASSWORD = serverProperties.getProperty("password");
+		AppSettings.SERVER_ADDRESS = serverProperties.getProperty("serverAddress");
 
 		CONNECTED = true;
 	}
@@ -69,10 +74,10 @@ public class Server {
 
 	public static Document getIndexes() {
 		try {
-			String urlS = Settings.SERVER_ADDRESS + "/rest/getIndexes.view?u="
-					+ Settings.SERVER_USERNAME + "&p="
-					+ Settings.SERVER_PASSWORD + "&v=1.5&c="
-					+ Settings.APPLICATION_NAME;
+			String urlS = AppSettings.SERVER_ADDRESS + "/rest/getIndexes.view?u="
+					+ AppSettings.SERVER_USERNAME + "&p="
+					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c="
+					+ AppSettings.APPLICATION_NAME;
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
 			Document doc = parse(is);
@@ -84,13 +89,39 @@ public class Server {
 		}
 
 	}
+	
+	public static Document getIndexes(long ifModifiedSince) {
+		try {
+			String urlS = AppSettings.SERVER_ADDRESS + "/rest/getIndexes.view?u="
+					+ AppSettings.SERVER_USERNAME + "&p="
+					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c="
+					+ AppSettings.APPLICATION_NAME
+					+ "&ifModifiedSince="
+					+ ifModifiedSince;
+			URL url = new URL(urlS);
+			InputStream is = url.openStream();
+			Document doc = parse(is);
+			int childs = doc.getChildNodes().getLength();
+			if (childs > 1) {
+				return doc;
+			} else {
+				return null;
+			}
+			
+		} catch (Exception ex) {
+			System.out.println("Server: ");
+			ex.printStackTrace();
+			return null;
+		}
+
+	}
 
 	public static Document getMusicDirectory(String artistOrAlbumID) {
 		try {
-			String urlS = Settings.SERVER_ADDRESS
+			String urlS = AppSettings.SERVER_ADDRESS
 					+ "/rest/getMusicDirectory.view?u="
-					+ Settings.SERVER_USERNAME + "&p="
-					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
+					+ AppSettings.SERVER_USERNAME + "&p="
+					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
 					+ artistOrAlbumID;
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
@@ -127,8 +158,8 @@ public class Server {
 	public static URL getStreamURL(String songID) {
 		URL url = null;
 		try {
-			String urlS = Settings.SERVER_ADDRESS + "/rest/stream.view?u="
-					+ Settings.SERVER_USERNAME + "&p=" + Settings.SERVER_PASSWORD
+			String urlS = AppSettings.SERVER_ADDRESS + "/rest/stream.view?u="
+					+ AppSettings.SERVER_USERNAME + "&p=" + AppSettings.SERVER_PASSWORD
 					+ "&v=1.5&c=SubsonicJ" + "&id=" + songID;
 			url = new URL(urlS);
 			return url;
@@ -145,9 +176,9 @@ public class Server {
 	public static Image getCoverArt(String albumArtID, int size) {
 		Image image = null;
 		try {
-			String urlS = Settings.SERVER_ADDRESS + "/rest/getCoverArt.view?u="
-					+ Settings.SERVER_USERNAME + "&p="
-					+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
+			String urlS = AppSettings.SERVER_ADDRESS + "/rest/getCoverArt.view?u="
+					+ AppSettings.SERVER_USERNAME + "&p="
+					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
 					+ albumArtID + "&size=" + size;
 			URL url = new URL(urlS);
 			image = ImageIO.read(url);
@@ -234,7 +265,7 @@ public class Server {
 	}
 
 	public static Document parse(InputStream is) {
-		Document ret = null;
+		Document theReturn = null;
 		DocumentBuilderFactory domFactory;
 		DocumentBuilder builder;
 
@@ -244,12 +275,12 @@ public class Server {
 			domFactory.setNamespaceAware(false);
 			builder = domFactory.newDocumentBuilder();
 
-			ret = (Document) builder.parse(is);
+			theReturn = (Document) builder.parse(is);
 		} catch (Exception ex) {
 			System.out.println("Server: Unable to load XML");
 			System.out.println(ex);
 		}
-		return ret;
+		return theReturn;
 	}
 
 	public static Image[] getAlbumImages(String artistID, int size) {
@@ -263,10 +294,10 @@ public class Server {
 			Element index = (Element) indexes.item(i);
 			String coverArtID = index.getAttribute("coverArt");
 			try {
-				String urlS = Settings.SERVER_ADDRESS
+				String urlS = AppSettings.SERVER_ADDRESS
 						+ "/rest/getCoverArt.view?u="
-						+ Settings.SERVER_USERNAME + "&p="
-						+ Settings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ"
+						+ AppSettings.SERVER_USERNAME + "&p="
+						+ AppSettings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ"
 						+ "&id=" + coverArtID + "&size=" + size;
 
 				URL url = new URL(urlS);

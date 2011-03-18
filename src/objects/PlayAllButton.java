@@ -14,24 +14,24 @@ import org.w3c.dom.NodeList;
 import servercontact.Server;
 import settings.Application;
 
-public class PlayAllButton extends JLabel implements Runnable{
-	
+public class PlayAllButton extends JLabel implements Runnable {
+
 	Thread t;
-	
-	public PlayAllButton(){
+
+	public PlayAllButton() {
 		setForeground(new Color(204, 204, 204));
 		setText("Play All");
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
 		addMouseListener(new MouseAdapter() {
-			
-			public void mouseClicked(MouseEvent e){
+
+			public void mouseClicked(MouseEvent e) {
 				init();
 			}
 		});
 	}
 
 	protected void init() {
-		if(t == null){
+		if (t == null) {
 			t = new Thread(this);
 			t.start();
 		} else {
@@ -39,17 +39,18 @@ public class PlayAllButton extends JLabel implements Runnable{
 			t = new Thread(this);
 			t.start();
 		}
-		
+
 	}
 
 	@Override
 	public void run() {
-		System.out.println("Adding songs to playlist - " + System.currentTimeMillis());
+		long start = System.currentTimeMillis();
+		System.out.println("Adding songs to playlist.");
 		CurrentPlaylist.clearPlaylist();
 		String[] currentIDs = Application.mainWindow.getVisibleData();
 		Document doc = Server.getMusicDirectory(currentIDs[0]);
 		NodeList songNodes = doc.getElementsByTagName("child");
-		if(songNodes.getLength() > 0){
+		if (songNodes.getLength() > 0) {
 			boolean play = true;
 			for (int i = 0; i < currentIDs.length; i++) {
 				doc = Server.getMusicDirectory(currentIDs[i]);
@@ -62,12 +63,18 @@ public class PlayAllButton extends JLabel implements Runnable{
 					play = false;
 				}
 			}
-			
+
 		} else {
-//			for (int i = 0; i < currentIDs.length; i++) {
-//				
-//			}
+			boolean play = false;
+			for (int i = 0; i < currentIDs.length; i++) {
+				for (int j = 0; j < songNodes.getLength(); j++) {
+					String songid = currentIDs[i];
+					//CurrentPlaylist.addSongToPlaylist(songid, parentid, play);
+				}
+			}
 		}
-		System.out.println("Songs added to playlist" + System.currentTimeMillis());
+		System.out.println(CurrentPlaylist.getPlaylistCount()
+				+ " songs added to playlist - took "
+				+ (System.currentTimeMillis() - start) + "ms");
 	}
 }
