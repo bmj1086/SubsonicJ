@@ -32,11 +32,12 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.SourceDataLine;
 
+import main.Application;
+
 import objects.CurrentPlaylist;
 
 import servercontact.Server;
 import settings.AppSettings;
-import settings.Application;
 
 public class MP3Player implements Runnable{
 	
@@ -121,7 +122,9 @@ public class MP3Player implements Runnable{
 	// changes the stop variable to stop the current song from
 	// playing. Also ends the instance of this class
 	public void stop() {
-		stop = true;
+		if (isPlaying() || isPaused()) {
+			stop = true;
+		}
 	}
 
 	// changes the pause variable to true and causes the line reading to 
@@ -132,14 +135,14 @@ public class MP3Player implements Runnable{
 	
 	// changes the pause variable to false and causes the line
 	// to continue reading
-	public void unPause() {
+	public void unpause() {
 		synchronized(lock) {
 			paused = false;
 			lock.notifyAll();
 		}
 	}
 
-	
+	// sets the 
 	public void mute(){
 		muteControl.setValue(true);
 	}
@@ -186,42 +189,41 @@ public class MP3Player implements Runnable{
 				muteControl = ((BooleanControl)control[1]);
 				int nBytesRead;
 				synchronized (lock) {
-					while ((nBytesRead = din.read(data, 0, data.length)) != -1) {
-						while (paused) {
+					// added !stop to the while loop to stop the reading if
+					// the user has requested to stop the song
+					while ((nBytesRead = din.read(data, 0, data.length)) != -1 && !stop) {
+						while (paused && !stop) {
 							if(line.isRunning()) {
 								line.stop();
 							}
 							try {
 								lock.wait();
 							}
-							catch(InterruptedException e) {
+							catch(InterruptedException ignore) {
 							}
 						}
-						if (stop){
-							stop = false;
-							playNext = false;
-							Application.showNowPlaying(false);
-							line.drain();
-							line.stop();
-							line.close();
-							din.close();
-						}
-						if(!line.isRunning()) {
+						// added !stop to prevent frame read if user pushed stop
+						// while the song is paused
+						if(!line.isRunning() && !stop) {
 							line.start();
 						}
 						
 						// sets the track position on the main screen.
 						int position = convertPositionToSeconds(line.getMicrosecondPosition());
-						Application.mainWindow.setTrackPosition(position);
 						line.write(data, 0, nBytesRead);
-						
+						Application.mainWindow.setTrackPosition(position);
 					}
 				}
-				line.drain();
-				line.stop();
-				line.close();
-				din.close();
+				if (stop){
+					stop = false;
+					playNext = false;
+					Application.showNowPlaying(false);
+				}
+				clearLine();
+				Application.mainWindow.setTrackPosition(0);
+				Application.mainWindow.setTrackDuration(0);
 				if(playNext) {
+					System.out.println("Playing next song in playlist");
 					CurrentPlaylist.skipToNextSong();
 				}
 			} else {
@@ -239,8 +241,22 @@ public class MP3Player implements Runnable{
 	}
 
 
+	private void clearLine() {
+		try {
+			line.drain();
+			line.flush();
+			line.stop();
+			line.close();
+			din.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+
 	private int convertPositionToSeconds(long microsecondPosition) {
-		double theReturnDouble = microsecondPosition / java.lang.Math.pow(10, 6);
+		double theReturnDouble = microsecondPosition / Math.pow(10, 6);
 		int theReturn = (int) Math.floor(theReturnDouble);
 		return theReturn;
 	}

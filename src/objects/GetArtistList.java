@@ -2,12 +2,16 @@ package objects;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.ListSelectionModel;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -15,6 +19,10 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import main.Application;
+
+import objects.windows.MainWindow;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,7 +34,7 @@ import settings.AppSettings;
 public class GetArtistList implements Runnable{
 
 	// the list used and set on the main window after the thread completes
-	JList artistList = null;
+	public JList artistList = null;
 
 	// the thread used to run the process
 	Thread thread;
@@ -106,6 +114,7 @@ public class GetArtistList implements Runnable{
 		//listModel.elementAt(position).setFocusable(false);
 
 	}
+
 
 	private void writeArtistCache(Document doc, File writeToFile) {
 		try {

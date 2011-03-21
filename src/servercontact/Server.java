@@ -161,6 +161,7 @@ public class Server {
 			String urlS = AppSettings.SERVER_ADDRESS + "/rest/stream.view?u="
 					+ AppSettings.SERVER_USERNAME + "&p=" + AppSettings.SERVER_PASSWORD
 					+ "&v=1.5&c=SubsonicJ" + "&id=" + songID;
+					//+ "&maxBitRate=" + AppSettings.userSetBitrate;
 			url = new URL(urlS);
 			return url;
 		} catch (Exception e) {
@@ -299,6 +300,7 @@ public class Server {
 						+ AppSettings.SERVER_USERNAME + "&p="
 						+ AppSettings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ"
 						+ "&id=" + coverArtID + "&size=" + size;
+
 
 				URL url = new URL(urlS);
 				images[i] = ImageIO.read(url);

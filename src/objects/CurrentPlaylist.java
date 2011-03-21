@@ -16,6 +16,8 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 
+
+import main.Application;
 import mp3player.MP3Player;
 
 import org.w3c.dom.Document;
@@ -26,7 +28,6 @@ import org.w3c.dom.NodeList;
 
 import servercontact.Server;
 import settings.AppSettings;
-import settings.Application;
 
 public class CurrentPlaylist {
 
@@ -110,12 +111,16 @@ public class CurrentPlaylist {
 		if (playlistProps.size() > 0) {
 			if (currentPosition < getPlaylistCount() - 1) {
 				currentPosition++;
-				stopCurrentSong();
+				if (isQueued()) {
+					stopCurrentSong();
+				}
 				playCurrentSong();
 			} else {
 				if (repeatPlay) {
 					currentPosition = 0;
-					stopCurrentSong();
+					if (isQueued()) {
+						stopCurrentSong();
+					}
 					playCurrentSong();
 				} else {
 					System.out.println("CurrentPlaylist: End of playlist");
@@ -167,6 +172,7 @@ public class CurrentPlaylist {
 		if (player != null) {
 			player.stop();
 			player = null;
+			System.gc();
 		}
 		Application.mainWindow.setPlaying(false);
 	}
@@ -177,7 +183,7 @@ public class CurrentPlaylist {
 	}
 
 	public static void unPause() {
-		player.unPause();
+		player.unpause();
 		Application.mainWindow.setPlaying(true);
 	}
 

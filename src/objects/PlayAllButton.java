@@ -7,12 +7,13 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JLabel;
 
+import main.Application;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import servercontact.Server;
-import settings.Application;
 
 public class PlayAllButton extends JLabel implements Runnable {
 

@@ -24,13 +24,16 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import main.Application;
+import main.Main;
+
+import objects.windows.MainWindow;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import servercontact.Server;
-import settings.Application;
-import subsonicj.Main;
 
 @SuppressWarnings("serial")
 public class SongsTable extends JTable {
@@ -109,9 +112,6 @@ public class SongsTable extends JTable {
 					String songID = getValueAt(row, 5).toString();
 					String parentID = getValueAt(row, 7).toString();
 					String songName = getValueAt(row, 3).toString();
-					// System.out.println("SongsTable: Setting current song to song id "
-					// + songID);
-					// System.out.println("__and parentID " + parentID);
 					CurrentPlaylist.clearPlaylist();
 					CurrentPlaylist.addSongToPlaylist(songID, parentID, true);
 
@@ -121,12 +121,7 @@ public class SongsTable extends JTable {
 					String songID = getValueAt(row, 5).toString();
 					String parentID = getValueAt(row, 7).toString();
 					String songName = getValueAt(row, 3).toString();
-					// System.out.println("SongsTable: Adding song id " +
-					// songID);
-					// System.out.println("__and parentID " + parentID);
 					CurrentPlaylist.addSongToPlaylist(songID, parentID, false);
-					System.out.println("CurrentPlaylist: Added " + songName
-							+ " to playlist successfully");
 					Application.setStatus("Added " + songName
 							+ " to playlist successfully");
 

@@ -13,6 +13,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import objects.windows.MainWindow;
+
 import servercontact.Server;
 
 @SuppressWarnings("serial")

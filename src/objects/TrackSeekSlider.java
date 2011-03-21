@@ -12,6 +12,8 @@ public class TrackSeekSlider extends JSlider {
 	public TrackSeekSlider(){
 		setFocusable(false);
 		setSnapToTicks(false);
+		setBorder(null);
+		setValue(0);
 		
 		UIManager.getLookAndFeelDefaults().put("Slider.horizontalThumbIcon",new Icon(){
 		        
