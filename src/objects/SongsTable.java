@@ -108,16 +108,14 @@ public class SongsTable extends JTable {
 				int column = columnAtPoint(click);
 				int row = rowAtPoint(click);
 				if (column == 0) {
-					System.out.println("Playing " + getValueAt(row, 3));
+					//System.out.println("Playing " + getValueAt(row, 3));
 					String songID = getValueAt(row, 5).toString();
 					String parentID = getValueAt(row, 7).toString();
-					String songName = getValueAt(row, 3).toString();
-					CurrentPlaylist.clearPlaylist();
+					//String songName = getValueAt(row, 3).toString();
+					CurrentPlaylist.stopAndClearPlaylist();
 					CurrentPlaylist.addSongToPlaylist(songID, parentID, true);
 
 				} else if (column == 1) {
-					System.out.println("SongsTable: Adding "
-							+ getValueAt(row, 3) + " to playlist");
 					String songID = getValueAt(row, 5).toString();
 					String parentID = getValueAt(row, 7).toString();
 					String songName = getValueAt(row, 3).toString();

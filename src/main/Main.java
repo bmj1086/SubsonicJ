@@ -36,7 +36,6 @@ import com.jtattoo.plaf.aluminium.AluminiumLookAndFeel;
 public class Main {
 
 	public static void main(String[] args) {
-		System.out.println(System.getProperty("d3d"));
 		createAppDirectories();
 		loadLookAndFeel();
 		Application.loadUIProperties();

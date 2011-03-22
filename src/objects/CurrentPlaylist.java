@@ -14,8 +14,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 import javax.swing.ImageIcon;
-
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import main.Application;
 import mp3player.MP3Player;
@@ -34,16 +37,14 @@ public class CurrentPlaylist {
 	// static CurrentSong currentSong = new CurrentSong();
 	static MP3Player player = null;
 
-	// static String[][] playlistData = null;
 	private static List<Properties> playlistProps = new ArrayList<Properties>(0);
+
+	// marker to show what position currently in use by the playlistProps
 	private static int currentPosition = 0;
 
-	// private static List<Integer> playedSongPositions = new
-	// ArrayList<Integer>(0);
-	private static List<Integer> playListList = null;
 	private static boolean repeatPlay = false;
 
-	public static boolean isQueued() {
+	public static boolean isActive() {
 		if (player == null) {
 			return false;
 		} else {
@@ -96,35 +97,27 @@ public class CurrentPlaylist {
 	}
 
 	public static void addSongToPlaylist(Properties properties, boolean play) {
-		// if(!playlistProps.contains(properties)){
 		playlistProps.add(properties);
 		if (play) {
-			playCurrentSong();
+			playSongAtCurrentPosition();
 		}
-		// } else {
-		// Application.setStatus(properties.getProperty("title") +
-		// " already exists in playlist");
-		// }
+
 	}
 
-	public static void skipToNextSong() {
-		if (playlistProps.size() > 0) {
-			if (currentPosition < getPlaylistCount() - 1) {
+	public static void playNextSong() {
+		if (!playlistProps.isEmpty()) {
+			if (currentPosition < getPlaylistMaxIndex()) {
 				currentPosition++;
-				if (isQueued()) {
-					stopCurrentSong();
-				}
-				playCurrentSong();
+				playSongAtCurrentPosition();
 			} else {
 				if (repeatPlay) {
 					currentPosition = 0;
-					if (isQueued()) {
-						stopCurrentSong();
-					}
-					playCurrentSong();
-				} else {
+					playSongAtCurrentPosition();
+				} else if (!repeatPlay) {
 					System.out.println("CurrentPlaylist: End of playlist");
 					Application.mainWindow.setStatus("End of playlist");
+					Application.showNowPlaying(false);
+					Application.mainWindow.setPlayButtonPressed(false);
 				}
 			}
 		}
@@ -138,53 +131,108 @@ public class CurrentPlaylist {
 				currentPosition--;
 			}
 			stopCurrentSong();
-			playCurrentSong();
+			playSongAtCurrentPosition();
 		}
 	}
 
-	public static void playCurrentSong() {
-		if (isQueued()) {
-			stopCurrentSong();
-		}
-		if (getPlaylistCount() > currentPosition) {
-			Properties currentSongProps = playlistProps.get(currentPosition);
-			player = new MP3Player(currentSongProps);
-			String songName = currentSongProps.getProperty("title");
-			String albumName = currentSongProps.getProperty("album");
-			Application.setStatus("Playing " + songName + " by " + albumName);
-			player.play();
-			Application.setNowPlayingLabels();
-			Application.mainWindow.setTrackDuration(Integer.parseInt(currentSongProps.getProperty("duration")));
-			Application.mainWindow.setPlaying(true);
-		} else {
-			Application.mainWindow.setPlaying(false);
-			System.out.println("CurrentPlaylist: No song in current playlist");
-			Application.mainWindow.setStatus("No song in current playlist");
-		}
+	public static void playSong(int i) {
+		currentPosition = i;
+		playSongAtCurrentPosition();
+	}
+	
+	public static void playSongAtCurrentPosition() {
+		/** adding an invokeLater method to avoid conflicts with playing multiple songs */
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (isActive()) {
+					try {
+						Thread.sleep(100);
+					} catch (Exception ignore) {
 
+					}
+				}
+				final Properties currentSongProps = playlistProps.get(currentPosition);
+				player = new MP3Player(currentSongProps);
+				
+				/** set title and status to match current song */
+				String songName = currentSongProps.getProperty("title");
+				String artistName = currentSongProps.getProperty("artist");
+				Application.setStatus("Playing " + songName + " by " + artistName);
+				Application.mainWindow.setTitle(songName + " - " + artistName);
+				
+				player.play();
+				player.addLineListener(createLineListener());
+				
+			}
+		});
+		
+		
+
+	}
+
+	private static LineListener createLineListener() {
+		return new LineListener() {
+
+			@Override
+			public void update(LineEvent event) { //
+				if (event.getType() == LineEvent.Type.START) {
+					Application.setNowPlayingLabels();
+					Application.showNowPlaying(true);
+					Application.mainWindow.setPlayButtonPressed(true);
+					/** set current song duration on main window */
+					Application.mainWindow.setTrackDuration(Integer.parseInt(player.songProperties.getProperty("duration")));
+					
+				} else if (event.getType() == LineEvent.Type.CLOSE) {
+					Application.mainWindow.setTrackPosition(0);
+					
+					if (player.songCompleted && !playlistProps.isEmpty()) { 
+						CurrentPlaylist.playNextSong();
+					} 
+					
+					// this should only happen when the player pushed the stop button on the main window
+					else if (!player.songCompleted && playlistProps.isEmpty()) { 
+						Application.showNowPlaying(false);
+						Application.mainWindow.setPlayButtonPressed(false);
+					}
+				}
+			}
+		};
 	}
 
 	public static int getPlaylistCount() {
 		return playlistProps.size();
 	}
+	
+	public static int getPlaylistMaxIndex() {
+		return playlistProps.size() - 1;
+	}
 
 	public static void stopCurrentSong() {
 		if (player != null) {
 			player.stop();
-			player = null;
-			System.gc();
 		}
-		Application.mainWindow.setPlaying(false);
+	}
+
+	public static void stopAndClearPlaylist() {
+		clearPlaylist();
+		stopCurrentSong();
+		Application.mainWindow.setPlayButtonPressed(false);
+	}
+	
+	public static boolean isEmpty() {
+		return playlistProps.isEmpty();
 	}
 
 	public static void pause() {
 		player.pause();
-		Application.mainWindow.setPlaying(false);
+		Application.mainWindow.setPlayButtonPressed(false);
 	}
 
 	public static void unPause() {
 		player.unpause();
-		Application.mainWindow.setPlaying(true);
+		Application.mainWindow.setPlayButtonPressed(true);
 	}
 
 	public static ImageIcon getCurrentAlbumArt(int size) {
@@ -235,4 +283,5 @@ public class CurrentPlaylist {
 		}
 	}
 
+	
 }

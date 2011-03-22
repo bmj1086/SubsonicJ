@@ -294,16 +294,6 @@ public class MainWindow extends JFrame {
 		return nowPlayingAlbumArtLabel;
 	}
 
-	// private JLabel getTrackLabel() {
-	// if (trackLabel == null) {
-	// trackLabel = new JLabel();
-	// trackLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
-	// trackLabel.setForeground(new Color(204, 204, 204));
-	// trackLabel.setText("Track:");
-	// }
-	// return trackLabel;
-	// }
-
 	private JLabel getNowPlayingTitleLabel() {
 		if (nowPlayingTitleLabel == null) {
 			nowPlayingTitleLabel = new JLabel();
@@ -378,14 +368,6 @@ public class MainWindow extends JFrame {
 		}
 		return nowPlayingSeparator;
 	}
-
-	// private JSlider getTrackPositionSlider() {
-	// if (trackSeekSlider == null) {
-	// trackSeekSlider = new TrackSeekSlider();
-	//
-	// }
-	// return trackSeekSlider;
-	// }
 
 	private JPanel getSelectedAlbumInfoPanel() {
 		if (selectedAlbumInfoPanel == null) {
@@ -530,11 +512,8 @@ public class MainWindow extends JFrame {
 			skipForwardButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					skipForwardButtonMouseClicked(e);
-				}
-
-				private void skipForwardButtonMouseClicked(MouseEvent e) {
-					CurrentPlaylist.skipToNextSong();
+					CurrentPlaylist.stopCurrentSong();
+					CurrentPlaylist.playNextSong();
 				}
 			});
 		}
@@ -574,9 +553,9 @@ public class MainWindow extends JFrame {
 			stopButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					if (CurrentPlaylist.isQueued()) {
-						CurrentPlaylist.clearPlaylist();
-						CurrentPlaylist.stopCurrentSong();
+					if (CurrentPlaylist.isActive()) {
+						CurrentPlaylist.stopAndClearPlaylist();
+						showNowPlaying(false);
 					}
 				}
 			});
@@ -628,8 +607,8 @@ public class MainWindow extends JFrame {
 			mediaControlPanel.add(getNowPlayingArtistLabel(), new Constraints(new Bilateral(440, 12, 47), new Leading(29, 12, 12)));
 			mediaControlPanel.add(getNowPlayingAlbumLabel(), new Constraints(new Bilateral(440, 12, 50), new Leading(46, 12, 12)));
 			mediaControlPanel.add(getNowPlayingSeparator(), new Constraints(new Leading(307, 2, 10, 10), new Leading(9, 53, 10, 10)));
-			mediaControlPanel.add(getTrackPositionLabel(), new Constraints(new Leading(234, 61, 68, 68), new Leading(51, 10, 10)));
-			mediaControlPanel.add(getTrackProgressBar(), new Constraints(new Leading(2, 229, 10, 10), new Leading(55, 7, 12, 12)));
+			mediaControlPanel.add(getTrackPositionLabel(), new Constraints(new Leading(216, 79, 68, 68), new Leading(51, 10, 10)));
+			mediaControlPanel.add(getTrackProgressBar(), new Constraints(new Leading(2, 202, 74, 74), new Leading(55, 9, 10, 10)));
 		}
 		return mediaControlPanel;
 	}
@@ -783,10 +762,6 @@ public class MainWindow extends JFrame {
 		});
 	}
 
-	/*
-	 * CUSTOM CLASSES THAT DON'T HAVE ANYTHNG TO DO WITH THE INITIAL LOADING
-	 */
-
 	private class ShowSongsThread implements Runnable {
 
 		String albumID, albumName, artistName;
@@ -835,8 +810,6 @@ public class MainWindow extends JFrame {
 			albumsSongsPanel.removeAll();
 			albumsSongsPanel.setLayout(null);
 			albumsSongsPanel.add(scrollPane);
-			// scrollPane.validate();
-			// albumsSongsPanel.validate();
 			setStatus(table.SONG_COUNT + " songs loaded for " + albumName);
 			selectedAlbumArtLabel.setIcon(new ImageIcon(Server.getCoverArt(
 					table.ALBUM_IMAGE_ID,
@@ -967,7 +940,6 @@ public class MainWindow extends JFrame {
 			albumsSongsPanel.removeAll();
 			albumsSongsPanel.setLayout(null);
 			albumsSongsPanel.add(scrollPane);
-			// albumsSongsPanel.validate();
 			setStatus(table.albumCount + " albums loaded for " + artistName);
 			Application.closeMessage(loadingMessage);
 		}
@@ -986,7 +958,7 @@ public class MainWindow extends JFrame {
 
 	}
 
-	public void setPlaying(boolean b) {
+	public void setPlayButtonPressed(boolean b) {
 		playButton.setPlaying(b);
 	}
 
@@ -995,30 +967,20 @@ public class MainWindow extends JFrame {
 
 	}
 
-	// public void startTrackTimer(int maximum) {
-	// trackSeekSlider.setMaximum(maximum);
-	// System.out.println("Maximum: " + maximum);
-	// trackSeekSlider.setMinimum(0);
-	// final Timer timer = new Timer();
-	// timer.scheduleAtFixedRate(new TimerTask() {
-	//
-	// @Override
-	// public void run() {
-	// if (CurrentPlaylist.isQueued()) {
-	// trackSeekSlider.setValue(CurrentPlaylist.getTrackPosition());
-	// } else {
-	// timer.cancel();
-	// }
-	// }
-	// }, 500, 500);
-	//
-	// }
 
 	public void setTrackDuration(int duration) {
 		int mins = (int) Math.floor(duration / 60);
 		int secs = (int) (duration % 60);
-		String durStr = Integer.toString(mins) + ":" + Integer.toString(secs);
-		trackPositionLabel.setText("0:00/" + durStr);
+		String secsStr = "0";
+		
+		if (secs < 10) {
+			secsStr += Integer.toString(secs);
+		} else {
+			secsStr = Integer.toString(secs);
+		}
+		
+		String durStr = Integer.toString(mins) + ":" + secsStr;
+		trackPositionLabel.setText("0:00 / " + durStr);
 		trackProgressBar.setMaximum(duration);
 	}
 
@@ -1030,8 +992,12 @@ public class MainWindow extends JFrame {
 		// current position
 		int mins = (int) Math.floor(position / 60);
 		int secs = (int) (position - (mins * 60));
-		String secsStr = (secs < 10) ? "0" + Integer.toString(secs) : Integer
-				.toString(secs);
+		String secsStr = null;
+		if (secs < 10) {
+			secsStr = "0" + Integer.toString(secs);
+		} else {
+			secsStr = Integer.toString(secs);
+		}
 
 		final String current = Integer.toString(mins) + ":" + secsStr;
 		trackPositionLabel.setText(current + "/" + durationStr);

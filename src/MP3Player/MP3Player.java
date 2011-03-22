@@ -32,10 +32,12 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.SourceDataLine;
 
+import javazoom.jl.decoder.Decoder;
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.AudioDevice;
+import javazoom.jl.player.advanced.PlaybackListener;
 import main.Application;
-
 import objects.CurrentPlaylist;
-
 import servercontact.Server;
 import settings.AppSettings;
 
@@ -73,7 +75,19 @@ public class MP3Player implements Runnable{
 	 * in the xml file from the subsonic API. Check Server class. */
 	public Properties songProperties = new Properties();
 	
-		
+	/* Listener for the playback process */
+    private PlaybackListener listener;
+	
+    /* The AudioDevice the audio samples are written to. */
+    private AudioDevice audio;
+    
+    /** If the user initiated the stop by pressing skip (forward of back) or by
+	 * pressing the stop button then the song didn't complete on it's own and 
+	 * will not automatically go to the next song in queue. If the song completes
+	 * then the song will continue to the next queue */
+    public boolean songCompleted;
+	
+    
 	/****** End variable declarations ******/
 	
 	
@@ -115,6 +129,26 @@ public class MP3Player implements Runnable{
 	public void play(){
 		if(t == null){
 			t = new Thread(this);
+//			line.addLineListener(new LineListener() {
+//				
+//				@Override
+//				public void update(LineEvent event) { // 
+//					if (event.getType() == LineEvent.Type.START) {
+//						// update UI
+//					} else if (event.getType() == LineEvent.Type.STOP) {
+//						System.out.println("MP3Player: Current song closed");
+//						boolean playNextSong = (stop != true);
+////						stop = false;
+//						if (playNextSong) {
+//							Application.mainWindow.setTrackPosition(0);
+//							CurrentPlaylist.skipToNextSong();
+//							System.out.println("MP3Player: Playing next song in playlist");
+//						} else {
+//							Application.showNowPlaying(false);
+//						}
+//					}
+//				}
+//			});
 			t.start();
 		}
 	}
@@ -176,7 +210,6 @@ public class MP3Player implements Runnable{
 	
 	@Override
 	public void run() {
-		boolean playNext = true;
 		try{
 			if(line != null) {
 				line.open(decodedFormat);
@@ -187,6 +220,8 @@ public class MP3Player implements Runnable{
 				volControl = ((FloatControl)control[0]);
 				volControl.setValue(AppSettings.getVolume());
 				muteControl = ((BooleanControl)control[1]);
+				
+				
 				int nBytesRead;
 				synchronized (lock) {
 					// added !stop to the while loop to stop the reading if
@@ -214,18 +249,20 @@ public class MP3Player implements Runnable{
 						Application.mainWindow.setTrackPosition(position);
 					}
 				}
+				/** check songCompleted declaration above for explanation */
 				if (stop){
 					stop = false;
-					playNext = false;
-					Application.showNowPlaying(false);
+					songCompleted = false;
+				} else {
+					songCompleted = true;
 				}
 				clearLine();
-				Application.mainWindow.setTrackPosition(0);
-				Application.mainWindow.setTrackDuration(0);
-				if(playNext) {
-					System.out.println("Playing next song in playlist");
-					CurrentPlaylist.skipToNextSong();
-				}
+//				Application.mainWindow.setTrackPosition(0);
+//				Application.mainWindow.setTrackDuration(0);
+//				if(playNext) {
+//					System.out.println("MP3Player: Playing next song in playlist");
+//					CurrentPlaylist.skipToNextSong();
+//				}
 			} else {
 				
 			}
@@ -239,10 +276,11 @@ public class MP3Player implements Runnable{
 		}
 		
 	}
-
-
+	
+	
 	private void clearLine() {
 		try {
+			System.out.println("MP3Player: Clearing line");
 			line.drain();
 			line.flush();
 			line.stop();
@@ -254,6 +292,9 @@ public class MP3Player implements Runnable{
 		
 	}
 
+	public void addLineListener(LineListener lineListener) {
+		line.addLineListener(lineListener);
+	}
 
 	private int convertPositionToSeconds(long microsecondPosition) {
 		double theReturnDouble = microsecondPosition / Math.pow(10, 6);
