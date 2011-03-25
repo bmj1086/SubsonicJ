@@ -26,6 +26,7 @@ import javax.swing.table.TableCellRenderer;
 
 import main.Application;
 import main.Main;
+import mp3player.CurrentPlaylist;
 
 import objects.windows.MainWindow;
 
@@ -66,6 +67,7 @@ public class SongsTable extends JTable {
 	private void initComponents() {
 		addMouseMotionListener(getMouseMotionListener());
 		Document doc = Server.getMusicDirectory(ALBUM_ID);
+		Server.currentMusicDirectoryID = ALBUM_ID;
 		NodeList songNodes = doc.getElementsByTagName("child");
 		SONG_COUNT = songNodes.getLength();
 		System.out.println("SongsTable: Found " + SONG_COUNT + " songs");

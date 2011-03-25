@@ -5,6 +5,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Timer;
@@ -28,6 +30,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -36,8 +39,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import main.Application;
+import mp3player.CurrentPlaylist;
 import objects.AlbumTable;
-import objects.CurrentPlaylist;
 import objects.GetArtistList;
 import objects.LoadingPane;
 import objects.MyScrollPane;
@@ -51,22 +54,23 @@ import org.dyno.visual.swing.layouts.GroupLayout;
 import org.dyno.visual.swing.layouts.Leading;
 import org.dyno.visual.swing.layouts.Trailing;
 
+import config.AppConfig;
+
 import servercontact.Server;
-import settings.AppSettings;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 
 	// private static final long serialVersionUID = 1L;
 	private JLabel appLogoLabel;
-	private JPanel mainPanel;
+	public JPanel mainPanel;
 	private JList artistList;
 	private JScrollPane artistScrollPane;
-	private JPanel statusPanel;
-	private JPanel linksPanel;
+	public JPanel statusPanel;
+	public JPanel linksPanel;
 	private JLabel selectedAlbumArtLabel;
-	private JPanel albumsSongsPanel;
-	private JPanel mediaControlPanel;
+	public JPanel albumsSongsPanel;
+	public JPanel mediaControlPanel;
 	private PlayButton playButton;
 	private JButton stopButton;
 	private JButton skipBackButton;
@@ -76,8 +80,7 @@ public class MainWindow extends JFrame {
 	private JLabel selectedAlbumArtistLabel;
 	private JButton repeatButton;
 	private JButton shuffleButton;
-	private JPanel selectedAlbumInfoPanel;
-	// private TrackSeekSlider trackSeekSlider;
+	public JPanel selectedAlbumInfoPanel;
 
 	/* button icons */
 	static ImageIcon pauseButtonIcon = new ImageIcon(
@@ -93,7 +96,6 @@ public class MainWindow extends JFrame {
 	private JLabel nowPlayingAlbumLabel;
 	private JLabel nowPlayingArtistLabel;
 	private JLabel nowPlayingTitleLabel;
-	// private JLabel trackLabel;
 	private JLabel nowPlayingAlbumArtLabel;
 
 	public static String[][] ARTIST_IDs = null;
@@ -106,10 +108,10 @@ public class MainWindow extends JFrame {
 	ShowAlbumsThread showAlbumsThread = new ShowAlbumsThread();
 	GetArtistList getArtistIndex = null;
 
-	private JLabel jLabel1;
+	private JLabel addAllButton;
 	private JSeparator jSeparator0;
 	private PlayAllButton playAllButton;
-	private JPanel breadcrumbPanel;
+	public JPanel breadcrumbPanel;
 	private JLabel statusLabel;
 	private JLabel volumeLabel;
 	private JSlider volumeSlider;
@@ -126,9 +128,7 @@ public class MainWindow extends JFrame {
 
 	}
 
-	/*
-	 * end dev usage
-	 */
+	/* end dev usage */
 
 	public MainWindow() {
 		initComponents();
@@ -168,7 +168,6 @@ public class MainWindow extends JFrame {
 		setLayout(new GroupLayout());
 		add(getMainPanel(), new Constraints(new Bilateral(0, 0, 326),
 				new Bilateral(0, 0, 545)));
-
 	}
 
 	private JLabel getTrackPositionLabel() {
@@ -183,21 +182,19 @@ public class MainWindow extends JFrame {
 	private JProgressBar getTrackProgressBar() {
 		if (trackProgressBar == null) {
 			trackProgressBar = new JProgressBar();
-			trackProgressBar.setBackground(new Color(50,50,50));
-			trackProgressBar.setBorder(null);
-			//trackProgressBar.setBorder(new MatteBorder(1, 1, 1, 1,
-			//		Application.AppColor_Border));
-			trackProgressBar.setForeground(new Color(65,65,65));
-			//trackProgressBar.setForeground(Application.AppColor_SelBgndClr);
+			trackProgressBar.setBackground(new Color(50, 50, 50));
+			trackProgressBar.setBorder(new EmptyBorder(1, 1, 1, 1));
+			trackProgressBar.setForeground(new Color(65, 65, 65));
 			trackProgressBar.setStringPainted(false);
 			trackProgressBar.addMouseListener(new MouseAdapter() {
 
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					int width = (int) trackProgressBar.getVisibleRect().getWidth();
+					int width = (int) trackProgressBar.getVisibleRect()
+							.getWidth();
 					int duration = trackProgressBar.getMaximum();
 					int mouseX = e.getX();
-					//float secsPerPixel = (duration / width);
+					// float secsPerPixel = (duration / width);
 					double toSet = mouseX * (duration / width);
 					System.out.println(toSet);
 				}
@@ -211,7 +208,7 @@ public class MainWindow extends JFrame {
 		if (volumeSlider == null) {
 			volumeSlider = new JSlider();
 			volumeSlider.setFocusable(false);
-			volumeSlider.setMinimum(-40);
+			volumeSlider.setMinimum(-60);
 			volumeSlider.setMaximum(5);
 			volumeSlider.setValue(0);
 			volumeSlider.setMinorTickSpacing(5);
@@ -276,14 +273,15 @@ public class MainWindow extends JFrame {
 		return jSeparator0;
 	}
 
-	private JLabel getJLabel1() {
-		if (jLabel1 == null) {
-			jLabel1 = new JLabel();
-			jLabel1.setForeground(new Color(204, 204, 204));
-			jLabel1.setText("Add All");
-			jLabel1.setToolTipText("Add all songs below to current playlist");
+	private JLabel getAddAllButton() {
+		if (addAllButton == null) {
+			addAllButton = new JLabel();
+			addAllButton.setForeground(new Color(204, 204, 204));
+			addAllButton.setText("Add All");
+			addAllButton
+					.setToolTipText("Add all songs below to current playlist");
 		}
-		return jLabel1;
+		return addAllButton;
 	}
 
 	private JLabel getNowPlayingAlbumArtLabel() {
@@ -388,10 +386,10 @@ public class MainWindow extends JFrame {
 	}
 
 	private void loadIndexes() {
-//		Application.showMessage("Loading artists", artistList,
-//				FloatingMessage.CENTER_PARENT, 0, false);
-		LoadingPane glassPane = new LoadingPane();
-		glassPane.setGlassPane(artistList.getRootPane());
+		// Application.showMessage("Loading artists", artistList,
+		// FloatingMessage.CENTER_PARENT, 0, false);
+		// LoadingPane glassPane = new LoadingPane();
+		// glassPane.setGlassPane(artistList.getRootPane());
 		setStatus("Loading artists from server");
 
 		if (getArtistIndex == null) {
@@ -427,8 +425,8 @@ public class MainWindow extends JFrame {
 							.addListSelectionListener(new MyListSelectionListener());
 					Application.closeMessage("Loading artists");
 					setStatus(artistList.getModel().getSize()
-							+ " artists found at " + AppSettings.SERVER_ADDRESS);
-					//artistScrollPane.getRootPane().setGlassPane(null);
+							+ " artists found at " + AppConfig.SERVER_ADDRESS);
+					// artistScrollPane.getRootPane().setGlassPane(null);
 				}
 
 			}
@@ -448,8 +446,7 @@ public class MainWindow extends JFrame {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					CurrentPlaylist.shuffle();
-					Application.showMessage("Playlist shuffled", shuffleButton,
-							FloatingMessage.BOTTOM_RIGHT, 3000, true);
+					Application.setStatus("Playlist Shuffled");
 				}
 			});
 		}
@@ -473,8 +470,7 @@ public class MainWindow extends JFrame {
 					String message = "Repeat ";
 					message = (CurrentPlaylist.isRepeatPlay()) ? "Repeat on"
 							: "Repeat off";
-					Application.showMessage(message, repeatButton,
-							FloatingMessage.BOTTOM_RIGHT, 3000, true);
+					Application.setStatus(message);
 				}
 			});
 		}
@@ -593,22 +589,42 @@ public class MainWindow extends JFrame {
 			mediaControlPanel = new JPanel();
 			mediaControlPanel.setBackground(new Color(34, 34, 34));
 			mediaControlPanel.setLayout(new GroupLayout());
-			mediaControlPanel.add(getSkipBackButton(), new Constraints(new Leading(0, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getStopButton(), new Constraints(new Leading(50, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getPlayButton(), new Constraints(new Leading(100, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getSkipForwardButton(), new Constraints(new Leading(150, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getShuffleButton(), new Constraints(new Leading(200, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getRepeatButton(), new Constraints(new Leading(250, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getNowPlayingAlbumArtLabel(), new Constraints(new Leading(323, 59, 12, 12), new Leading(9, 53, 12, 12)));
-			mediaControlPanel.add(getNowPlayingTitleLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(12, 12, 12)));
-			mediaControlPanel.add(getNowPlayingArtistLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(29, 12, 12)));
-			mediaControlPanel.add(getNowPlayingAlbumLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(46, 12, 12)));
-			mediaControlPanel.add(getNowPlayingTitleLabel(), new Constraints(new Bilateral(440, 12, 40), new Leading(12, 12, 12)));
-			mediaControlPanel.add(getNowPlayingArtistLabel(), new Constraints(new Bilateral(440, 12, 47), new Leading(29, 12, 12)));
-			mediaControlPanel.add(getNowPlayingAlbumLabel(), new Constraints(new Bilateral(440, 12, 50), new Leading(46, 12, 12)));
-			mediaControlPanel.add(getNowPlayingSeparator(), new Constraints(new Leading(307, 2, 10, 10), new Leading(9, 53, 10, 10)));
-			mediaControlPanel.add(getTrackPositionLabel(), new Constraints(new Leading(216, 79, 68, 68), new Leading(51, 10, 10)));
-			mediaControlPanel.add(getTrackProgressBar(), new Constraints(new Leading(2, 202, 74, 74), new Leading(55, 9, 10, 10)));
+			mediaControlPanel.add(getSkipBackButton(), new Constraints(
+					new Leading(0, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getStopButton(), new Constraints(new Leading(
+					50, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getPlayButton(), new Constraints(new Leading(
+					100, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getSkipForwardButton(), new Constraints(
+					new Leading(150, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getShuffleButton(), new Constraints(
+					new Leading(200, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getRepeatButton(), new Constraints(
+					new Leading(250, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getNowPlayingAlbumArtLabel(),
+					new Constraints(new Leading(323, 59, 12, 12), new Leading(
+							9, 53, 12, 12)));
+			mediaControlPanel.add(getNowPlayingTitleLabelLabel(),
+					new Constraints(new Leading(394, 12, 12), new Leading(12,
+							12, 12)));
+			mediaControlPanel.add(getNowPlayingArtistLabelLabel(),
+					new Constraints(new Leading(394, 12, 12), new Leading(29,
+							12, 12)));
+			mediaControlPanel.add(getNowPlayingAlbumLabelLabel(),
+					new Constraints(new Leading(394, 12, 12), new Leading(46,
+							12, 12)));
+			mediaControlPanel.add(getNowPlayingTitleLabel(), new Constraints(
+					new Bilateral(440, 12, 40), new Leading(12, 12, 12)));
+			mediaControlPanel.add(getNowPlayingArtistLabel(), new Constraints(
+					new Bilateral(440, 12, 47), new Leading(29, 12, 12)));
+			mediaControlPanel.add(getNowPlayingAlbumLabel(), new Constraints(
+					new Bilateral(440, 12, 50), new Leading(46, 12, 12)));
+			mediaControlPanel.add(getNowPlayingSeparator(), new Constraints(
+					new Leading(307, 2, 10, 10), new Leading(9, 53, 10, 10)));
+			mediaControlPanel.add(getTrackPositionLabel(), new Constraints(
+					new Leading(216, 79, 68, 68), new Leading(51, 10, 10)));
+			mediaControlPanel.add(getTrackProgressBar(), new Constraints(
+					new Leading(2, 202, 74, 74), new Leading(55, 9, 10, 10)));
 		}
 		return mediaControlPanel;
 	}
@@ -629,8 +645,8 @@ public class MainWindow extends JFrame {
 					new Color(102, 102, 102)));
 			linksPanel.setForeground(new Color(204, 204, 204));
 			linksPanel.setLayout(new GroupLayout());
-			linksPanel.add(getJLabel1(), new Constraints(
-					new Leading(85, 12, 12), new Leading(5, 12, 12)));
+			linksPanel.add(getAddAllButton(), new Constraints(new Leading(85,
+					12, 12), new Leading(5, 12, 12)));
 			linksPanel.add(getJSeparator0(), new Constraints(new Leading(71,
 					12, 12), new Leading(5, 16, 12, 12)));
 			linksPanel.add(getPlayAllButton(), new Constraints(new Leading(12,
@@ -674,7 +690,8 @@ public class MainWindow extends JFrame {
 		if (artistScrollPane == null) {
 			artistScrollPane = new JScrollPane();
 			artistScrollPane.setBackground(new Color(34, 34, 34));
-			artistScrollPane.setBorder(null);
+			artistScrollPane.setBorder(BorderFactory.createMatteBorder(1, 1, 1,
+					1, new Color(45, 45, 45)));
 			artistScrollPane.setViewportView(getArtistList());
 		}
 		return artistScrollPane;
@@ -684,12 +701,9 @@ public class MainWindow extends JFrame {
 		if (artistList == null) {
 			artistList = new JList();
 			artistList.setBackground(new Color(34, 34, 34));
-			artistList.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			artistList.setForeground(new Color(204, 204, 204));
-			artistList.setSelectionForeground(artistList.getBackground());
-			artistList.setSelectionBackground(artistList.getForeground());
 			artistList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			DefaultListModel listModel = new DefaultListModel();
+			artistList.setCellRenderer(new GetArtistList.ArtistCellRenderer());
 			artistList.setModel(listModel);
 		}
 		return artistList;
@@ -720,8 +734,62 @@ public class MainWindow extends JFrame {
 			artistFilterTextField.setText("Filter");
 			artistFilterTextField.setBorder(new LineBorder(new Color(102, 102,
 					102), 1, true));
+			artistFilterTextField.addKeyListener(getFilterKeyListener());
 		}
 		return artistFilterTextField;
+	}
+
+	private KeyListener getFilterKeyListener() {
+		return new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				final String filterText = ((JTextField) e.getSource()).getText().toLowerCase();
+				
+				SwingUtilities.invokeLater(new Runnable() {
+					
+					@Override
+					public void run() {
+						DefaultListModel model = (DefaultListModel) artistList.getModel();; 
+						
+						if (filterText.length() > 1) {
+							GetArtistList.filteredItems.clear();
+							for (int i = 0; i < GetArtistList.unfilteredItems.size(); i++) {
+								if (GetArtistList.unfilteredItems.get(i).toLowerCase().contains(filterText)){
+									GetArtistList.filteredItems.add(GetArtistList.unfilteredItems.get(i));
+									System.out.println("Adding " + GetArtistList.unfilteredItems.get(i));
+								}
+							}
+							if (!GetArtistList.filteredItems.isEmpty()) {
+								model.removeAllElements();
+								for (int j = 0; j < GetArtistList.filteredItems.size(); j++) {
+									model.add(j, GetArtistList.filteredItems.get(j));
+								}
+							}
+						} else {
+							model.removeAllElements();
+							for (int k = 0; k < GetArtistList.unfilteredItems.size(); k++) {
+								model.add(k, GetArtistList.unfilteredItems.get(k));
+							}
+						}
+						artistList.setModel(model);
+						
+					}
+				});
+				
+				
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				//
+			}
+		};
 	}
 
 	private JPanel getMainPanel() {
@@ -762,6 +830,7 @@ public class MainWindow extends JFrame {
 		});
 	}
 
+
 	private class ShowSongsThread implements Runnable {
 
 		String albumID, albumName, artistName;
@@ -794,9 +863,11 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void run() {
+			albumsSongsPanel.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			albumsSongsPanel.removeAll();
 			String loadingMessage = "Loading songs";
-			Application.showMessage(loadingMessage, albumsSongsPanel,
-					FloatingMessage.CENTER_PARENT, 0, false);
+			// Application.showMessage(loadingMessage, albumsSongsPanel,
+			// FloatingMessage.CENTER_PARENT, 0, false);
 			showSelectedAlbumInfo(true);
 			setStatus("Loading songs for " + albumName);
 			SongsTable table = new SongsTable(albumID);
@@ -817,6 +888,7 @@ public class MainWindow extends JFrame {
 			CURRENT_SONGS_DATA = getSongsData(table);
 			scrollPane.setVisible(true);
 			Application.closeMessage(loadingMessage);
+			albumsSongsPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
 	}
 
@@ -911,9 +983,11 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void run() {
+			albumsSongsPanel.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			albumsSongsPanel.removeAll();
 			String loadingMessage = "Loading albums";
-			Application.showMessage(loadingMessage, albumsSongsPanel,
-					FloatingMessage.CENTER_PARENT, 0, false);
+			// Application.showMessage(loadingMessage, albumsSongsPanel,
+			// FloatingMessage.CENTER_PARENT, 0, false);
 			showSelectedAlbumInfo(false);
 			final AlbumTable table = new AlbumTable(artistID);
 			MyScrollPane scrollPane = new MyScrollPane(table);
@@ -942,6 +1016,7 @@ public class MainWindow extends JFrame {
 			albumsSongsPanel.add(scrollPane);
 			setStatus(table.albumCount + " albums loaded for " + artistName);
 			Application.closeMessage(loadingMessage);
+			albumsSongsPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
 	}
 
@@ -967,28 +1042,28 @@ public class MainWindow extends JFrame {
 
 	}
 
-
 	public void setTrackDuration(int duration) {
 		int mins = (int) Math.floor(duration / 60);
 		int secs = (int) (duration % 60);
 		String secsStr = "0";
-		
+
 		if (secs < 10) {
 			secsStr += Integer.toString(secs);
 		} else {
 			secsStr = Integer.toString(secs);
 		}
-		
+
 		String durStr = Integer.toString(mins) + ":" + secsStr;
 		trackPositionLabel.setText("0:00 / " + durStr);
 		trackProgressBar.setMaximum(duration);
+
 	}
 
 	public void setTrackPosition(int position) {
 		// duration
 		String[] tmp = trackPositionLabel.getText().split("/");
 		String durationStr = tmp[tmp.length - 1];
-		
+
 		// current position
 		int mins = (int) Math.floor(position / 60);
 		int secs = (int) (position - (mins * 60));
@@ -1000,9 +1075,11 @@ public class MainWindow extends JFrame {
 		}
 
 		final String current = Integer.toString(mins) + ":" + secsStr;
-		trackPositionLabel.setText(current + "/" + durationStr);
+		trackPositionLabel.setText(current + " /" + durationStr); // durationStr
+																	// already
+																	// contains
+																	// the space
 		trackProgressBar.setValue(position);
-		
 
 	}
 

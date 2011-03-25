@@ -22,11 +22,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import settings.AppSettings;
+import config.AppConfig;
+
 
 public class Server {
 
 	public static boolean CONNECTED = false;
+	
+	public static String currentMusicDirectoryID;
 	
 	public static boolean testConnection(String serverAddressS,
 			String serverUserS, String serverPasswordS) {
@@ -54,11 +57,11 @@ public class Server {
 	}
 
 	public static void connectToServer(String string) {
-		Properties serverProperties = AppSettings.loadServerInfoFromFile(string);
-		AppSettings.SERVER_NAME = serverProperties.getProperty("serverName");
-		AppSettings.SERVER_USERNAME = serverProperties.getProperty("username");
-		AppSettings.SERVER_PASSWORD = serverProperties.getProperty("password");
-		AppSettings.SERVER_ADDRESS = serverProperties.getProperty("serverAddress");
+		Properties serverProperties = AppConfig.loadServerInfoFromFile(string);
+		AppConfig.SERVER_NAME = serverProperties.getProperty("serverName");
+		AppConfig.SERVER_USERNAME = serverProperties.getProperty("username");
+		AppConfig.SERVER_PASSWORD = serverProperties.getProperty("password");
+		AppConfig.SERVER_ADDRESS = serverProperties.getProperty("serverAddress");
 
 		CONNECTED = true;
 	}
@@ -74,10 +77,10 @@ public class Server {
 
 	public static Document getIndexes() {
 		try {
-			String urlS = AppSettings.SERVER_ADDRESS + "/rest/getIndexes.view?u="
-					+ AppSettings.SERVER_USERNAME + "&p="
-					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c="
-					+ AppSettings.APPLICATION_NAME;
+			String urlS = AppConfig.SERVER_ADDRESS + "/rest/getIndexes.view?u="
+					+ AppConfig.SERVER_USERNAME + "&p="
+					+ AppConfig.SERVER_PASSWORD + "&v=1.5&c="
+					+ AppConfig.APPLICATION_NAME;
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
 			Document doc = parse(is);
@@ -92,16 +95,16 @@ public class Server {
 	
 	public static Document getIndexes(long ifModifiedSince) {
 		try {
-			String urlS = AppSettings.SERVER_ADDRESS + "/rest/getIndexes.view?u="
-					+ AppSettings.SERVER_USERNAME + "&p="
-					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c="
-					+ AppSettings.APPLICATION_NAME
+			String urlS = AppConfig.SERVER_ADDRESS + "/rest/getIndexes.view?u="
+					+ AppConfig.SERVER_USERNAME + "&p="
+					+ AppConfig.SERVER_PASSWORD + "&v=1.5&c="
+					+ AppConfig.APPLICATION_NAME
 					+ "&ifModifiedSince="
 					+ ifModifiedSince;
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
 			Document doc = parse(is);
-			int childs = doc.getChildNodes().getLength();
+			int childs = doc.getDocumentElement().getChildNodes().getLength();
 			if (childs > 1) {
 				return doc;
 			} else {
@@ -118,14 +121,15 @@ public class Server {
 
 	public static Document getMusicDirectory(String artistOrAlbumID) {
 		try {
-			String urlS = AppSettings.SERVER_ADDRESS
+			String urlS = AppConfig.SERVER_ADDRESS
 					+ "/rest/getMusicDirectory.view?u="
-					+ AppSettings.SERVER_USERNAME + "&p="
-					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
+					+ AppConfig.SERVER_USERNAME + "&p="
+					+ AppConfig.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
 					+ artistOrAlbumID;
 			URL url = new URL(urlS);
 			InputStream is = url.openStream();
 			Document doc = parse(is);
+			//System.out.println("Server: Changing current music directory to " + artistOrAlbumID);
 			return doc;
 		} catch (Exception ex) {
 			System.out.println("Server: ");
@@ -158,8 +162,8 @@ public class Server {
 	public static URL getStreamURL(String songID) {
 		URL url = null;
 		try {
-			String urlS = AppSettings.SERVER_ADDRESS + "/rest/stream.view?u="
-					+ AppSettings.SERVER_USERNAME + "&p=" + AppSettings.SERVER_PASSWORD
+			String urlS = AppConfig.SERVER_ADDRESS + "/rest/stream.view?u="
+					+ AppConfig.SERVER_USERNAME + "&p=" + AppConfig.SERVER_PASSWORD
 					+ "&v=1.5&c=SubsonicJ" + "&id=" + songID;
 					//+ "&maxBitRate=" + AppSettings.userSetBitrate;
 			url = new URL(urlS);
@@ -177,9 +181,9 @@ public class Server {
 	public static Image getCoverArt(String albumArtID, int size) {
 		Image image = null;
 		try {
-			String urlS = AppSettings.SERVER_ADDRESS + "/rest/getCoverArt.view?u="
-					+ AppSettings.SERVER_USERNAME + "&p="
-					+ AppSettings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
+			String urlS = AppConfig.SERVER_ADDRESS + "/rest/getCoverArt.view?u="
+					+ AppConfig.SERVER_USERNAME + "&p="
+					+ AppConfig.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ" + "&id="
 					+ albumArtID + "&size=" + size;
 			URL url = new URL(urlS);
 			image = ImageIO.read(url);
@@ -295,10 +299,10 @@ public class Server {
 			Element index = (Element) indexes.item(i);
 			String coverArtID = index.getAttribute("coverArt");
 			try {
-				String urlS = AppSettings.SERVER_ADDRESS
+				String urlS = AppConfig.SERVER_ADDRESS
 						+ "/rest/getCoverArt.view?u="
-						+ AppSettings.SERVER_USERNAME + "&p="
-						+ AppSettings.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ"
+						+ AppConfig.SERVER_USERNAME + "&p="
+						+ AppConfig.SERVER_PASSWORD + "&v=1.5&c=SubsonicJ"
 						+ "&id=" + coverArtID + "&size=" + size;
 
 

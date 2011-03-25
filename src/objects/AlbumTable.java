@@ -27,8 +27,9 @@ public class AlbumTable extends JTable {
     public int albumCount = 0;
 	
 	public AlbumTable(String incomingArtistID){
-		super();
+		//super();
 		ARTIST_ID = incomingArtistID;
+		Server.currentMusicDirectoryID = incomingArtistID;
         initComponents();
         addMouseMotionListener(getMouseMotionListener());
 	}

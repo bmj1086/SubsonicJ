@@ -1,11 +1,17 @@
 package objects.windows;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import main.Application;
 
 @SuppressWarnings("serial")
 public class SplashDialog extends javax.swing.JDialog {
 
+	private javax.swing.JLabel label;
+    
     public SplashDialog(java.awt.Frame parent, boolean modal) {
         setModal(modal);
     	initComponents();
@@ -24,19 +30,30 @@ public class SplashDialog extends javax.swing.JDialog {
         label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/application-splash.png"))); // NOI18N
         label.setBounds(0, 0, 530, 350);
         getContentPane().add(label);
-        
+        addWindowStateListener(new WindowStateListener() {
+			
+			@Override
+			public void windowStateChanged(WindowEvent e) {
+				System.out.println(e);
+				System.out.println("SplashDialog: Closing splash screen");
+            	System.exit(0); 
+			}
+		});
     }
 
     private void startDieTimer() {
-		Timer timer = new Timer();
+		final Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
 			@Override
 			public void run() {
-				dispose();
+				if (Application.mainWindow != null) {
+					timer.cancel();
+					dispose();
+				}
 				
 			}
-		},3000, 3000); 
+		}, 1000, 100); 
 		
 	}
 
@@ -45,20 +62,10 @@ public class SplashDialog extends javax.swing.JDialog {
 
             public void run() {
                 SplashDialog dialog = new SplashDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                    	System.out.println("SplashDialog: Closing splash screen");
-                    	System.exit(0);                        
-                    }
-                });
                 dialog.setVisible(true);
             }
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel label;
-    // End of variables declaration//GEN-END:variables
-
+    
 }

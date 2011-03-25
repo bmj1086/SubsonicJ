@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 
 import main.Application;
+import mp3player.CurrentPlaylist;
 
 @SuppressWarnings("serial")
 public class PlayButton extends JToggleButton {

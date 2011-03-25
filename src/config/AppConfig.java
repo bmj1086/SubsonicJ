@@ -1,4 +1,4 @@
-package settings;
+package config;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class AppSettings {
+public class AppConfig {
 
 	public static final String fileSep = System.getProperty("file.separator");
 	public static final String appDirectory = System.getProperty("user.home")
@@ -102,11 +102,11 @@ public class AppSettings {
 				return tmp;
 			} catch (IOException ioe) {
 				System.out.println("Settings: Can't load settings - " + ioe);
-				return new DefaultSettings();
+				return new DefaultConfig();
 			}
 		} else {
 			System.out.println("Settings: No user settings file exists");
-			return new DefaultSettings();
+			return new DefaultConfig();
 		}
 
 	}

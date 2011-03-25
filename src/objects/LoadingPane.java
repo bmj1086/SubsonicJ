@@ -1,59 +1,62 @@
 package objects;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
+import main.Application;
 
-public class LoadingPane extends JPanel {
+public class LoadingPane extends JPanel implements ActionListener {
+	private Container contentPane;
+	private boolean inited;
+	JPasswordField pass;
 
-	private JRootPane m_rootPane = null;
+	public LoadingPane(Container contentPane) {
+		this.contentPane = contentPane;
+		setLayout(null);
 
-	// Stores the previous Glass Pane Component
-	private Component m_prevGlassPane = null;
-	private boolean m_handleMouseEvents = false;
-	private boolean m_drawing = false;
+	}
 
-	public LoadingPane() {
+	private void init() {
+		inited = true;
+		setBounds(contentPane.getX(), contentPane.getY(), 100, 25);  //contentPane.getWidth(), contentPane.getHeight());
+		setMaximumSize(getSize());
+		setMinimumSize(getSize());
 		
 	}
 
-	public void setGlassPane(JRootPane rootPane) {
-		m_rootPane = rootPane;
-
-		// store the current glass pane
-		// m_prevGlassPane = m_rootPane.getGlassPane();
-
-		// set this as new glass pane
-		m_rootPane.setGlassPane(this);
-
-		// set opaque to false, i.e. make transparent
-		setOpaque(false);
-
-		setLayout(null);
-
-		JLabel label = new JLabel("Loading");
-		label.setBounds(getWidth() / 2, getHeight() / 2, 300, 30);
-		add(label);
-	}
-
-	public void removeGlassPane() {
-		// set the glass pane visible false
-		setVisible(false);
-
-		// reset the previous glass pane
-		m_rootPane.setGlassPane(null);
-	}
-	
 	@Override
-	public void paintComponent(Graphics g)
-    {
-        super.paintComponent(g);
-        Color bgColor = new Color(34, 34, 34, 50); //r,g,b,alpha
-        g.setColor(bgColor);
-        //g.fillRect(0,0,260,500); //x,y,width,height
-    } 
+	public void paintComponent(Graphics gr) {
+		super.paintComponent(gr);// makes sure MyGlass's widgets are drawn
+									// automatically
+
+		if (!inited) {
+			init();
+		}
+
+		Graphics2D g = (Graphics2D) gr;
+		// create (fake) transparency
+		AlphaComposite transparent = AlphaComposite.getInstance(
+				AlphaComposite.SRC_OVER, .7f);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setComposite(transparent);
+		// draw the contents of the JFrame's content pane upon our glass pane.
+		contentPane.paint(gr);
+		Color bgColor = new Color(50, 50, 50, 50);
+		g.setColor(bgColor);
+		g.fillRect(0, 0, getWidth(), getHeight());
+
+		AlphaComposite solid = AlphaComposite.getInstance(
+				AlphaComposite.SRC_OVER, 1f);
+		g.setComposite(solid);
+		g.setColor(Color.black);
+		g.drawString("Glass pane string", 50, 100);
+		g.drawString("which is drawn manually!", 50, 120);
+	}
+
+	public void actionPerformed(ActionEvent ae) {
+		setVisible(false);
+	}
 }
