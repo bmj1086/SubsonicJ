@@ -1,11 +1,16 @@
 package main;
 
+import java.awt.Image;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
+import objects.TrayRightClickMenu;
 import objects.windows.MainWindow;
 import objects.windows.ServerInfoDialog;
 import objects.windows.SplashDialog;
@@ -27,10 +32,48 @@ public class Main {
 		
 		loadServerForm();
 		loadMainWindow();
-
+		//loadTrayIcon();
+		addShutdownHook();
+	}
+	
+	private static void loadTrayIcon() {
+		String tooltip = "SubsonicJ";
+		Image image = Toolkit.getDefaultToolkit().getImage(
+				Main.class.getResource("/res/Tray-icon.png"));
+		TrayIcon trayIcon = new TrayIcon(image, tooltip, null);
+		final TrayRightClickMenu popupMenu = new TrayRightClickMenu();
+		trayIcon.addMouseListener(new MouseAdapter() {
+			public void mouseReleased(MouseEvent evt) {
+				if (evt.isPopupTrigger()) {
+					popupMenu.setLocation((evt.getPoint().x - popupMenu.getWidth()), (evt.getPoint().y - popupMenu.getHeight()));
+					popupMenu.setInvoker(popupMenu);
+					popupMenu.setVisible(true);
+				}
+			}
+		});
+		if (SystemTray.isSupported()) {
+			try {
+				SystemTray.getSystemTray().add(trayIcon);
+			} catch (Exception e) {
+				System.out.println("Main: Can't add tray icon");
+				e.printStackTrace();
+			}
+		}
 	}
 
-	
+	// adds a hook to the shutdown operation of this application.
+	private static void addShutdownHook() {
+		Thread hook = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				System.out.println("Exiting SubsonicJ...");
+				// TODO: Save settings when applicable
+			}
+		});
+		Runtime.getRuntime().addShutdownHook(hook);
+	}
+
 	private static void loadLookAndFeel() {
 		try {
 			UIManager
@@ -63,7 +106,7 @@ public class Main {
 	
 	private static void createAppDirectories() {
 		String[] dirs = new String[] { AppConfig.appDirectory,
-				AppConfig.serversDirectory, AppConfig.settingsDirectory };
+				AppConfig.serversDirectory, AppConfig.settingsDirectory, AppConfig.cacheDirectory };
 
 		for (int i = 0; i < dirs.length; i++) {
 			File directory = new File(dirs[i]);

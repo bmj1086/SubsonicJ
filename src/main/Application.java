@@ -21,13 +21,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Callable;
 
 import javax.swing.JPanel;
 
-import objects.PlayAllButton;
+import objects.TrayRightClickMenu;
 import objects.windows.FloatingMessage;
 import objects.windows.MainWindow;
 import objects.windows.ServerInfoDialog;
@@ -43,11 +40,12 @@ public class Application {
 	public static ServerInfoDialog serverInfoDialog = null;
 	public static Properties decoratedProperties;
 	public static Properties undecoratedProperties;
+	public static TrayRightClickMenu trayRightClickMenu;
 
 	// colors to use in the application
 	public static Color AppColor_Dark = new Color(34, 34, 34);
 	public static Color AppColor_Text = new Color(204, 204, 204);
-	public static Color AppColor_Border = new Color(102, 102, 102);
+	public static Color AppColor_Border = new Color(65, 65, 65);
 	public static Color AppColor_SelBgndClr = new Color(50, 50, 50);
 
 	public static void loadUIProperties() {
@@ -73,6 +71,7 @@ public class Application {
 		mainWindow.showNowPlaying(bool);
 		if (bool) {
 			mainWindow.setNowPlayingLabels();
+			
 		}
 	}
 

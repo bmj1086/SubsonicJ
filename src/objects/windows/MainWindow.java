@@ -5,13 +5,17 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -27,6 +31,7 @@ import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -40,9 +45,9 @@ import javax.swing.table.DefaultTableModel;
 
 import main.Application;
 import mp3player.CurrentPlaylist;
+import objects.AddAllButton;
 import objects.AlbumTable;
 import objects.GetArtistList;
-import objects.LoadingPane;
 import objects.MyScrollPane;
 import objects.PlayAllButton;
 import objects.PlayButton;
@@ -54,9 +59,8 @@ import org.dyno.visual.swing.layouts.GroupLayout;
 import org.dyno.visual.swing.layouts.Leading;
 import org.dyno.visual.swing.layouts.Trailing;
 
-import config.AppConfig;
-
 import servercontact.Server;
+import config.AppConfig;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
@@ -113,10 +117,14 @@ public class MainWindow extends JFrame {
 	private PlayAllButton playAllButton;
 	public JPanel breadcrumbPanel;
 	private JLabel statusLabel;
-	private JLabel volumeLabel;
 	private JSlider volumeSlider;
 	private JProgressBar trackProgressBar;
 	private JLabel trackPositionLabel;
+	private JSeparator jSeparator1;
+	private JLabel jLabel0;
+	private JSeparator jSeparator2;
+	private JLabel jLabel1;
+	private JToggleButton volumeToggleButton;
 
 	/*
 	 * for dev usage I use this area to test things by assigning them to the app
@@ -160,7 +168,7 @@ public class MainWindow extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(MainWindow.EXIT_ON_CLOSE);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(
-				getClass().getResource("/res/Application-256.png")));
+				getClass().getResource("/res/Application-256-trans.png")));
 		setEnabled(true);
 		setMinimumSize(new Dimension(984, 575));
 		setPreferredSize(new Dimension(984, 575));
@@ -168,6 +176,72 @@ public class MainWindow extends JFrame {
 		setLayout(new GroupLayout());
 		add(getMainPanel(), new Constraints(new Bilateral(0, 0, 326),
 				new Bilateral(0, 0, 545)));
+	}
+
+	private JToggleButton getJToggleButton0() {
+		if (volumeToggleButton == null) {
+			volumeToggleButton = new JToggleButton();
+			volumeToggleButton.setText("");
+			//volumeToggleButton.setBackground(Application.AppColor_Dark);
+			volumeToggleButton.setContentAreaFilled(false);
+			//volumeToggleButton.setFocusable(false);
+			volumeToggleButton.setFocusPainted(false);
+			volumeToggleButton.setSelectedIcon(new ImageIcon(getClass().getResource(
+				"/res/Mute-24.png")));
+			volumeToggleButton.setIcon(new ImageIcon(getClass().getResource(
+				"/res/Vol-24.png")));
+			volumeToggleButton.setBorder(null);
+			
+			volumeToggleButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (volumeToggleButton.isSelected()) {
+						CurrentPlaylist.mute();
+					} else {
+						CurrentPlaylist.unmute();
+					}
+				}
+			});
+		}
+		return volumeToggleButton;
+	}
+
+	private JLabel getJLabel1() {
+		if (jLabel1 == null) {
+			jLabel1 = new JLabel();
+			jLabel1.setForeground(new Color(204, 204, 204));
+			jLabel1.setText("Comment");
+		}
+		return jLabel1;
+	}
+
+	private JSeparator getJSeparator2() {
+		if (jSeparator2 == null) {
+			jSeparator2 = new JSeparator();
+			jSeparator2.setForeground(new Color(102, 102, 102));
+			jSeparator2.setOrientation(SwingConstants.VERTICAL);
+		}
+		return jSeparator2;
+	}
+
+	private JLabel getJLabel0() {
+		if (jLabel0 == null) {
+			jLabel0 = new JLabel();
+			jLabel0.setForeground(new Color(204, 204, 204));
+			jLabel0.setText("Shuffle All");
+		}
+		return jLabel0;
+	}
+
+	private JSeparator getJSeparator1() {
+		if (jSeparator1 == null) {
+			jSeparator1 = new JSeparator();
+			jSeparator1.setForeground(new Color(102, 102, 102));
+			jSeparator1.setOrientation(SwingConstants.VERTICAL);
+			jSeparator1.setPreferredSize(new Dimension(1, 0));
+		}
+		return jSeparator1;
 	}
 
 	private JLabel getTrackPositionLabel() {
@@ -229,15 +303,6 @@ public class MainWindow extends JFrame {
 		return volumeSlider;
 	}
 
-	private JLabel getVolumeLabel() {
-		if (volumeLabel == null) {
-			volumeLabel = new JLabel();
-			volumeLabel.setForeground(new Color(204, 204, 204));
-			volumeLabel.setText("Volume:");
-		}
-		return volumeLabel;
-	}
-
 	private JLabel getStatusLabel() {
 		if (statusLabel == null) {
 			statusLabel = new JLabel();
@@ -275,11 +340,7 @@ public class MainWindow extends JFrame {
 
 	private JLabel getAddAllButton() {
 		if (addAllButton == null) {
-			addAllButton = new JLabel();
-			addAllButton.setForeground(new Color(204, 204, 204));
-			addAllButton.setText("Add All");
-			addAllButton
-					.setToolTipText("Add all songs below to current playlist");
+			addAllButton = new AddAllButton();
 		}
 		return addAllButton;
 	}
@@ -372,15 +433,9 @@ public class MainWindow extends JFrame {
 			selectedAlbumInfoPanel = new JPanel();
 			selectedAlbumInfoPanel.setBackground(new Color(34, 34, 34));
 			selectedAlbumInfoPanel.setLayout(new GroupLayout());
-			selectedAlbumInfoPanel.add(getSelectedAlbumArtLabel(),
-					new Constraints(new Leading(10, 10, 31), new Leading(10,
-							138, 10, 10)));
-			selectedAlbumInfoPanel.add(getSelectedAlbumArtistLabel(),
-					new Constraints(new Leading(10, 150, 12, 12), new Leading(
-							154, 12, 12)));
-			selectedAlbumInfoPanel.add(getSelectedAlbumNameLabel(),
-					new Constraints(new Leading(10, 150, 12, 12), new Leading(
-							175, 12, 12)));
+			selectedAlbumInfoPanel.add(getSelectedAlbumArtLabel(), new Constraints(new Leading(10, 10, 31), new Leading(10, 138, 10, 10)));
+			selectedAlbumInfoPanel.add(getSelectedAlbumArtistLabel(), new Constraints(new Leading(10, 150, 12, 12), new Leading(154, 12, 12)));
+			selectedAlbumInfoPanel.add(getSelectedAlbumNameLabel(), new Constraints(new Leading(10, 150, 12, 12), new Leading(175, 12, 12)));
 		}
 		return selectedAlbumInfoPanel;
 	}
@@ -550,6 +605,7 @@ public class MainWindow extends JFrame {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					if (CurrentPlaylist.isActive()) {
+						CurrentPlaylist.mute();
 						CurrentPlaylist.stopAndClearPlaylist();
 						showNowPlaying(false);
 					}
@@ -589,42 +645,22 @@ public class MainWindow extends JFrame {
 			mediaControlPanel = new JPanel();
 			mediaControlPanel.setBackground(new Color(34, 34, 34));
 			mediaControlPanel.setLayout(new GroupLayout());
-			mediaControlPanel.add(getSkipBackButton(), new Constraints(
-					new Leading(0, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getStopButton(), new Constraints(new Leading(
-					50, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getPlayButton(), new Constraints(new Leading(
-					100, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getSkipForwardButton(), new Constraints(
-					new Leading(150, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getShuffleButton(), new Constraints(
-					new Leading(200, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getRepeatButton(), new Constraints(
-					new Leading(250, 43, 10, 10), new Leading(5, 42, 11, 11)));
-			mediaControlPanel.add(getNowPlayingAlbumArtLabel(),
-					new Constraints(new Leading(323, 59, 12, 12), new Leading(
-							9, 53, 12, 12)));
-			mediaControlPanel.add(getNowPlayingTitleLabelLabel(),
-					new Constraints(new Leading(394, 12, 12), new Leading(12,
-							12, 12)));
-			mediaControlPanel.add(getNowPlayingArtistLabelLabel(),
-					new Constraints(new Leading(394, 12, 12), new Leading(29,
-							12, 12)));
-			mediaControlPanel.add(getNowPlayingAlbumLabelLabel(),
-					new Constraints(new Leading(394, 12, 12), new Leading(46,
-							12, 12)));
-			mediaControlPanel.add(getNowPlayingTitleLabel(), new Constraints(
-					new Bilateral(440, 12, 40), new Leading(12, 12, 12)));
-			mediaControlPanel.add(getNowPlayingArtistLabel(), new Constraints(
-					new Bilateral(440, 12, 47), new Leading(29, 12, 12)));
-			mediaControlPanel.add(getNowPlayingAlbumLabel(), new Constraints(
-					new Bilateral(440, 12, 50), new Leading(46, 12, 12)));
-			mediaControlPanel.add(getNowPlayingSeparator(), new Constraints(
-					new Leading(307, 2, 10, 10), new Leading(9, 53, 10, 10)));
-			mediaControlPanel.add(getTrackPositionLabel(), new Constraints(
-					new Leading(216, 79, 68, 68), new Leading(51, 10, 10)));
-			mediaControlPanel.add(getTrackProgressBar(), new Constraints(
-					new Leading(2, 202, 74, 74), new Leading(55, 9, 10, 10)));
+			mediaControlPanel.add(getSkipBackButton(), new Constraints(new Leading(0, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getStopButton(), new Constraints(new Leading(50, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getPlayButton(), new Constraints(new Leading(100, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getSkipForwardButton(), new Constraints(new Leading(150, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getShuffleButton(), new Constraints(new Leading(200, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getRepeatButton(), new Constraints(new Leading(250, 43, 10, 10), new Leading(5, 42, 11, 11)));
+			mediaControlPanel.add(getNowPlayingAlbumArtLabel(), new Constraints(new Leading(323, 59, 12, 12), new Leading(9, 53, 12, 12)));
+			mediaControlPanel.add(getNowPlayingTitleLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(12, 12, 12)));
+			mediaControlPanel.add(getNowPlayingArtistLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(29, 12, 12)));
+			mediaControlPanel.add(getNowPlayingAlbumLabelLabel(), new Constraints(new Leading(394, 12, 12), new Leading(46, 12, 12)));
+			mediaControlPanel.add(getNowPlayingTitleLabel(), new Constraints(new Bilateral(440, 12, 40), new Leading(12, 12, 12)));
+			mediaControlPanel.add(getNowPlayingArtistLabel(), new Constraints(new Bilateral(440, 12, 47), new Leading(29, 12, 12)));
+			mediaControlPanel.add(getNowPlayingAlbumLabel(), new Constraints(new Bilateral(440, 12, 50), new Leading(46, 12, 12)));
+			mediaControlPanel.add(getNowPlayingSeparator(), new Constraints(new Leading(307, 2, 10, 10), new Leading(9, 53, 10, 10)));
+			mediaControlPanel.add(getTrackPositionLabel(), new Constraints(new Leading(223, 70, 68, 68), new Leading(51, 10, 10)));
+			mediaControlPanel.add(getTrackProgressBar(), new Constraints(new Leading(2, 209, 74, 74), new Leading(55, 9, 10, 10)));
 		}
 		return mediaControlPanel;
 	}
@@ -641,20 +677,18 @@ public class MainWindow extends JFrame {
 		if (linksPanel == null) {
 			linksPanel = new JPanel();
 			linksPanel.setBackground(new Color(34, 34, 34));
-			linksPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
-					new Color(102, 102, 102)));
+			linksPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(102, 102, 102)));
 			linksPanel.setForeground(new Color(204, 204, 204));
 			linksPanel.setLayout(new GroupLayout());
-			linksPanel.add(getAddAllButton(), new Constraints(new Leading(85,
-					12, 12), new Leading(5, 12, 12)));
-			linksPanel.add(getJSeparator0(), new Constraints(new Leading(71,
-					12, 12), new Leading(5, 16, 12, 12)));
-			linksPanel.add(getPlayAllButton(), new Constraints(new Leading(12,
-					47, 12, 12), new Leading(5, 10, 10)));
-			linksPanel.add(getVolumeSlider(), new Constraints(new Trailing(12,
-					91, 142, 142), new Leading(5, 16, 12, 12)));
-			linksPanel.add(getVolumeLabel(), new Constraints(new Trailing(115,
-					136, 136), new Leading(5, 12, 12)));
+			linksPanel.add(getAddAllButton(), new Constraints(new Leading(85, 12, 12), new Leading(5, 12, 12)));
+			linksPanel.add(getPlayAllButton(), new Constraints(new Leading(12, 47, 12, 12), new Leading(5, 10, 10)));
+			linksPanel.add(getVolumeSlider(), new Constraints(new Trailing(12, 91, 142, 142), new Leading(5, 12, 12)));
+			linksPanel.add(getJSeparator0(), new Constraints(new Leading(71, 179, 179), new Leading(5, 16, 12, 12)));
+			linksPanel.add(getJSeparator1(), new Constraints(new Leading(136, 10, 10), new Leading(5, 16, 12, 12)));
+			linksPanel.add(getJLabel0(), new Constraints(new Leading(149, 173, 173), new Leading(5, 12, 12)));
+			linksPanel.add(getJSeparator2(), new Constraints(new Leading(218, 1, 10, 10), new Leading(5, 16, 12, 12)));
+			linksPanel.add(getJLabel1(), new Constraints(new Leading(231, 173, 173), new Leading(5, 12, 12)));
+			linksPanel.add(getJToggleButton0(), new Constraints(new Trailing(109, 23, 10, 10), new Leading(3, 20, 12, 12)));
 		}
 		return linksPanel;
 	}
@@ -797,25 +831,15 @@ public class MainWindow extends JFrame {
 			mainPanel = new JPanel();
 			mainPanel.setBackground(new Color(34, 34, 34));
 			mainPanel.setLayout(new GroupLayout());
-			mainPanel.add(getAppLogoLabel(), new Constraints(new Leading(12,
-					302, 12, 12), new Leading(12, 61, 12, 12)));
-			mainPanel.add(getStatusPanel(), new Constraints(new Bilateral(0, 0,
-					0), new Trailing(0, 23, 166, 472)));
-			mainPanel.add(getLinksPanel(), new Constraints(new Bilateral(325,
-					197, 462), new Leading(91, 28, 44, 44)));
-			mainPanel.add(getArtistScrollPane(), new Constraints(new Leading(
-					13, 300, 12, 12), new Bilateral(131, 32, 22)));
-			mainPanel.add(getArtistFilterTextField(), new Constraints(
-					new Leading(12, 303, 10, 10), new Leading(91, 27, 10, 10)));
-			mainPanel
-					.add(getMediaControlPanel(), new Constraints(new Bilateral(
-							325, 12, 305), new Leading(12, 70, 153, 153)));
-			mainPanel.add(getAlbumsSongsPanel(), new Constraints(new Bilateral(
-					325, 197, 462), new Bilateral(156, 32, 0)));
-			mainPanel.add(getJPanel0(), new Constraints(new Bilateral(325, 197,
-					0), new Leading(124, 26, 10, 10)));
-			mainPanel.add(getSelectedAlbumInfoPanel(), new Constraints(
-					new Trailing(0, 0, 0), new Trailing(32, 402, 10, 10)));
+			mainPanel.add(getAppLogoLabel(), new Constraints(new Leading(12, 302, 12, 12), new Leading(12, 61, 12, 12)));
+			mainPanel.add(getStatusPanel(), new Constraints(new Bilateral(0, 0, 0), new Trailing(0, 23, 166, 472)));
+			mainPanel.add(getLinksPanel(), new Constraints(new Bilateral(325, 197, 462), new Leading(91, 28, 44, 44)));
+			mainPanel.add(getArtistScrollPane(), new Constraints(new Leading(13, 300, 12, 12), new Bilateral(131, 32, 22)));
+			mainPanel.add(getMediaControlPanel(), new Constraints(new Bilateral(325, 12, 305), new Leading(12, 70, 153, 153)));
+			mainPanel.add(getAlbumsSongsPanel(), new Constraints(new Bilateral(325, 197, 462), new Bilateral(156, 32, 0)));
+			mainPanel.add(getJPanel0(), new Constraints(new Bilateral(325, 197, 0), new Leading(124, 26, 10, 10)));
+			mainPanel.add(getSelectedAlbumInfoPanel(), new Constraints(new Trailing(0, 0, 0), new Trailing(32, 402, 10, 10)));
+			mainPanel.add(getArtistFilterTextField(), new Constraints(new Leading(12, 303, 10, 10), new Leading(91, 28, 61, 256)));
 		}
 		return mainPanel;
 	}
@@ -929,7 +953,7 @@ public class MainWindow extends JFrame {
 			if (!evt.getValueIsAdjusting()) {
 				try {
 					JList list = (JList) evt.getSource();
-					int selectedIndex = evt.getLastIndex();
+					//int selectedIndex = evt.getLastIndex();
 					String value = (String) list.getSelectedValue();
 					String artistID = getArtistID(value.toString());
 					showAlbums(artistID, value.toString());
@@ -1006,7 +1030,15 @@ public class MainWindow extends JFrame {
 									.toString();
 							String albumID = CURRENT_ALBUM_IDs[e
 									.getFirstIndex()][2].toString();
-							showSongs(albumID, albumName, artistName);
+							
+							boolean isDir = Server.containsDirectories(albumID);
+							
+							if (isDir) {
+								showAlbums(albumID, artistName);
+							} else {
+								showSongs(albumID, albumName, artistName);
+							}
+							
 							table.setEnabled(false);
 						}
 

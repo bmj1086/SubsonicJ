@@ -15,6 +15,7 @@ public class AppConfig {
 			+ fileSep;
 	public static final String settingsDirectory = appDirectory + "Settings"
 			+ fileSep;
+	public static final String cacheDirectory = appDirectory + "cache" + fileSep;
 	public static Properties userSettings = null;
 	public static final String userPropertiesFileS = settingsDirectory
 			+ "userSettings.properties";
@@ -28,7 +29,7 @@ public class AppConfig {
 	public static final String APPLICATION_NAME = "SubsonicJ";
 	public static String VERSION = "";
 	private static float volume;
-	public static String localArtistListFileString = settingsDirectory + fileSep + "artistCache.xml";
+	public static String localArtistListFileString = cacheDirectory + fileSep + "artistCache.xml";
 
 	
 	public static boolean savePropertiesToFile(Properties props,

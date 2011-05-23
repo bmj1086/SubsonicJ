@@ -1,5 +1,10 @@
 package mp3player;
 
+//now able to queue current playlist with next song. Start this when the current song is X percent completed 
+//http://www.exampledepot.com/egs/java.lang/WorkQueue.html
+
+
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +29,9 @@ public class CurrentPlaylist {
 	// static CurrentSong currentSong = new CurrentSong();
 	static MP3Player player = null;
 
+	/* boolean used to determine if user is has chosen to mute or not */
+    public static boolean MUTE = false;
+    
 	
 	private static List<Properties> playlistProps = new ArrayList<Properties>(0);
 
@@ -54,6 +62,7 @@ public class CurrentPlaylist {
 
 	
 	public static void clearPlaylist() {
+		System.out.println("CurrentPlaylist: Clearing current playlist");
 		playlistProps.clear();
 		currentPosition = 0;
 	}
@@ -61,6 +70,7 @@ public class CurrentPlaylist {
 	
 	public static void setRepeatPlayback(boolean set) {
 		repeatPlay = set;
+		System.out.println("Repeat playback set to " + repeatPlay);
 		Application.setStatus("Repeat playback: " + repeatPlay);
 	}
 
@@ -203,6 +213,20 @@ public class CurrentPlaylist {
 		}
 	}
 	
+	public static void mute() {
+		MUTE = true;
+		if (player != null) {
+			player.mute();
+		}
+		
+	}
+	
+	public static void unmute() {
+		MUTE = true;
+		if (player != null) {
+			player.unmute();
+		}
+	}
 	
 	public static int getPlaylistCount() {
 		return playlistProps.size();
@@ -222,8 +246,8 @@ public class CurrentPlaylist {
 
 	
 	public static void stopAndClearPlaylist() {
-		clearPlaylist();
 		stopCurrentSong();
+		clearPlaylist();
 		Application.mainWindow.setPlayButtonPressed(false);
 	}
 	
@@ -234,12 +258,14 @@ public class CurrentPlaylist {
 
 	
 	public static void pause() {
+		System.out.println("CurrentPlaylist: pausing song");
 		player.pause();
 		Application.mainWindow.setPlayButtonPressed(false);
 	}
 
 	
 	public static void unPause() {
+		System.out.println("CurrentPlaylist: unpausing song"); 
 		player.unpause();
 		Application.mainWindow.setPlayButtonPressed(true);
 	}
@@ -290,6 +316,7 @@ public class CurrentPlaylist {
 
 	
 	public static void shuffle() {
+		System.out.println("CurrentPlaylist: shuffling playlist");
 		Collections.shuffle(playlistProps);
 		for (int i = 0; i < playlistProps.size(); i++) {
 			if (player.songProperties.getProperty("title").equals(

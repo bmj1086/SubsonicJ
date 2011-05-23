@@ -129,6 +129,7 @@ public class GetArtistList implements Runnable {
 
 	}
 
+	@SuppressWarnings("serial")
 	public static class ArtistCellRenderer extends JLabel implements ListCellRenderer {
 		
 		public ArtistCellRenderer() {
@@ -163,14 +164,14 @@ public class GetArtistList implements Runnable {
 			
 			if (isSelected) {
 				setBackground(Application.AppColor_SelBgndClr);
-				setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, new Color(65, 65, 65)));
+				setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, Application.AppColor_Border));
 				
 			}
 			
 			if (!isSelected) {
 				//setBackground(Application.AppColor_Dark);
 				setBackground(new Color(28,28,28));
-				setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+				setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
 				//setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			}
 			

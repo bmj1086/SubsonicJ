@@ -18,8 +18,12 @@ import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import main.Cache;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import config.AppConfig;
@@ -308,6 +312,7 @@ public class Server {
 
 				URL url = new URL(urlS);
 				images[i] = ImageIO.read(url);
+				
 
 			} catch (Exception ex) {
 				System.out.println("Server: ");
@@ -315,6 +320,7 @@ public class Server {
 				return null;
 			}
 		}
+		Cache.addAlbumImagesToCache(images);
 		return images;
 	}
 
@@ -361,5 +367,21 @@ public class Server {
 			coverArtIDs[i] = albumName;
 		}
 		return coverArtIDs;
+	}
+
+	
+	public static boolean containsDirectories(String albumID) {
+		Document doc = Server.getMusicDirectory(albumID);
+		NodeList nodeList = doc.getElementsByTagName("child");
+		
+		Element firstNode = (Element) nodeList.item(0);
+
+		if (Boolean.parseBoolean(firstNode.getAttribute("isDir"))) {
+			return true;
+		} else {
+			return false;
+		}
+
+		
 	}
 }
