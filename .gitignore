@@ -1,9 +1,0 @@
-bin
-META-INF
-*.swp
-*settings*
-*classpath*
-*project*
-*gitignore*
-*.log*
-
