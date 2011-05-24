@@ -1,4 +1,4 @@
-/* README 
+/* README *
  * Class used to play a single file. Must be disposed of after single use
  * Use the CurrentPlaylist class to store songs and create instances of
  * this class to play songs and control playback.
